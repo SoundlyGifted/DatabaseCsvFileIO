@@ -1,0 +1,66 @@
+.outputTable {
+    width: 35%; 
+    font-family: "Arial Black", Gadget, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: black;
+    border-collapse: collapse;
+    border-bottom: 3px solid cadetblue;
+}
+
+.outputTable caption {
+    padding: 10px;
+    color: black;
+    font-size: 18px;
+    text-align: left;
+    font-weight: bold;
+}
+
+.outputTable th {
+    font-size: 14px;
+    color: white;
+    padding: 10px;
+    text-align: left;
+}
+
+.outputTable td {
+    padding: 5px;
+}
+
+.outputTable tr:nth-child(2){
+    border-top: 3px solid cadetblue;    
+}
+
+.outputTable tr:nth-child(n+2):nth-child(odd) {
+    background: white;
+}
+.outputTable tr:nth-child(n+2):nth-child(even) {
+    background: #e8e8e8;
+}
+
+
+
+/*.button {
+    color: white;
+    background-color: cadetblue;
+    
+    max-width: 80%;
+    font-size: 1.0rem;
+     20px 
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    display: inline-block;
+    overflow: hidden;
+    padding: 0.625rem 1.25rem;
+     10px 20px     
+}*/
+
+/*.button:focus,
+.button.has-focus 
+.button:hover {
+    outline: 1px dotted #000;
+    outline: -webkit-focus-ring-color auto 5px;
+    background-color: #0082a4;
+}*/
