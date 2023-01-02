@@ -1,6 +1,7 @@
 
 package web.common;
 
+import jakarta.ejb.Stateless;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -10,7 +11,6 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.ejb.Stateless;
 import web.csvData.CSVFileData;
 
 /**
@@ -29,8 +29,7 @@ public class DatabaseHandler implements DatabaseHandlerLocal {
     private final String dpPass = "app";
     
     private Connection getDatabaseConnection() throws SQLException {
-        DriverManager.registerDriver(new org.apache.derby.jdbc
-                .EmbeddedDriver());
+        DriverManager.registerDriver(new org.apache.derby.iapi.jdbc.AutoloadedDriver());
         return DriverManager.getConnection(dbURL, dbUser, dpPass);        
     }
     

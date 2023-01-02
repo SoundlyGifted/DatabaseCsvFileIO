@@ -1,7 +1,7 @@
 
 package web.common;
 
-import javax.ejb.Local;
+import jakarta.ejb.Local;
 import web.csvData.CSVFileData;
 
 /**
