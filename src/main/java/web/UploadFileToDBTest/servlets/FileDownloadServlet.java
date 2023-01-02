@@ -1,5 +1,5 @@
 
-package web.servlets;
+package web.UploadFileToDBTest.servlets;
 
 import com.opencsv.CSVWriter;
 import java.io.File;
@@ -16,8 +16,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.csv.*;
-import web.common.DatabaseHandlerLocal;
-import web.csvData.CSVFileData;
+import web.UploadFileToDBTest.common.DatabaseHandlerLocal;
+import web.UploadFileToDBTest.csvData.CSVFileData;
 
 /**
  * This Servlet handles ".csv" file download from Database requests based on 

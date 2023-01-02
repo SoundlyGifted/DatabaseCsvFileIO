@@ -1,5 +1,5 @@
 
-package web.servlets;
+package web.UploadFileToDBTest.servlets;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -18,8 +18,8 @@ import org.apache.commons.csv.*;
 import org.apache.commons.io.input.*;
 import com.opencsv.*;
 import com.opencsv.exceptions.CsvValidationException;
-import web.common.DatabaseHandlerLocal;
-import web.csvData.CSVFileData;
+import web.UploadFileToDBTest.common.DatabaseHandlerLocal;
+import web.UploadFileToDBTest.csvData.CSVFileData;
 
 /**
  * This Servlet handles ".csv" file upload to Database requests based on 

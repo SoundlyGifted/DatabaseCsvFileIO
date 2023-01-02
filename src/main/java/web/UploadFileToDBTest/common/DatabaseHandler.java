@@ -1,5 +1,5 @@
 
-package web.common;
+package web.UploadFileToDBTest.common;
 
 import jakarta.ejb.Stateless;
 import java.sql.Connection;
@@ -11,7 +11,7 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import web.csvData.CSVFileData;
+import web.UploadFileToDBTest.csvData.CSVFileData;
 
 /**
  * This Bean contains implementation of methods that are used to handle 

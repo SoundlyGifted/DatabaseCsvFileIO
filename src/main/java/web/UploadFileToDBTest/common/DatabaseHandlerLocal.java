@@ -1,8 +1,8 @@
 
-package web.common;
+package web.UploadFileToDBTest.common;
 
 import jakarta.ejb.Local;
-import web.csvData.CSVFileData;
+import web.UploadFileToDBTest.csvData.CSVFileData;
 
 /**
  * This Interface contains method declarations that are used to handle 
