@@ -1,4 +1,3 @@
-
 package web.UploadFileToDBTest.common;
 
 import jakarta.ejb.Stateless;
@@ -12,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import web.UploadFileToDBTest.csvData.CSVFileData;
+import web.UploadFileToDBTest.exceptions.GeneralApplicationException;
 
 /**
  * This Bean contains implementation of methods that are used to handle 
@@ -37,7 +37,8 @@ public class DatabaseHandler implements DatabaseHandlerLocal {
      * {@inheritDoc}
      */
     @Override
-    public boolean insertMultRecs(CSVFileData csvFileData) {
+    public boolean insertMultRecs(CSVFileData csvFileData) 
+            throws GeneralApplicationException {
         String sql = "INSERT INTO MYDATA (TEXTDATA, DOUBLEDATA) values (?, ?)";
         Connection con;
         PreparedStatement statement = null;
@@ -46,7 +47,10 @@ public class DatabaseHandler implements DatabaseHandlerLocal {
         } catch (SQLException ex) {
             System.out.println("*** [DatabaseHandler] Error establishing "
                     + "database connection: " + ex.getMessage());
-            return false;
+            GeneralApplicationException exception 
+                    = new GeneralApplicationException("Error establishing "
+                            + "database connection: " + ex.getMessage(), ex);
+            throw exception;
         }
         try {
             statement = con.prepareStatement(sql);
@@ -102,7 +106,10 @@ public class DatabaseHandler implements DatabaseHandlerLocal {
         } catch (SQLException ex) {
             System.out.println("*** [DatabaseHandler] Error executing prepared "
                     + "statement: " + ex.getMessage());
-            return false;
+            GeneralApplicationException exception 
+                    = new GeneralApplicationException("Error executing prepared "
+                            + "statement: " + ex.getMessage(), ex);
+            throw exception;
         } finally {
             csvFileData = null;
             if (statement != null) {
@@ -111,6 +118,11 @@ public class DatabaseHandler implements DatabaseHandlerLocal {
                 } catch (SQLException ex) {
                     System.out.println("*** [DatabaseHandler] Error closing "
                             + "prepared statement: " + ex.getMessage());
+                    GeneralApplicationException exception
+                            = new GeneralApplicationException("Error closing "
+                                    + "prepared statement: " 
+                                    + ex.getMessage(), ex);
+                    throw exception;                   
                 }
             }
             if (con != null) {
@@ -119,6 +131,11 @@ public class DatabaseHandler implements DatabaseHandlerLocal {
                 } catch (SQLException ex) {
                     System.out.println("*** [DatabaseHandler] Error closing "
                             + "database connection: " + ex.getMessage());
+                    GeneralApplicationException exception
+                            = new GeneralApplicationException("Error closing "
+                                    + "database connection: " 
+                                    + ex.getMessage(), ex);
+                    throw exception;
                 }
             }
         }
@@ -129,7 +146,7 @@ public class DatabaseHandler implements DatabaseHandlerLocal {
      * {@inheritDoc}
      */
     @Override
-    public CSVFileData selectAll() {
+    public CSVFileData selectAll() throws GeneralApplicationException {
         CSVFileData csvFileData = new CSVFileData();
 
         String sql = "SELECT * FROM MYDATA";
@@ -141,7 +158,11 @@ public class DatabaseHandler implements DatabaseHandlerLocal {
         } catch (SQLException ex) {
             System.out.println("*** [DatabaseHandler] Error establishing "
                     + "database connection: " + ex.getMessage());
-            return csvFileData;
+            GeneralApplicationException exception
+                    = new GeneralApplicationException("Error establishing "
+                            + "database connection: "
+                            + ex.getMessage(), ex);
+            throw exception;
         }
 
         try {
@@ -178,7 +199,10 @@ public class DatabaseHandler implements DatabaseHandlerLocal {
         } catch (SQLException ex) {
             System.out.println("*** [DatabaseHandler] Error executing prepared "
                     + "statement: " + ex.getMessage());
-            return csvFileData;
+            GeneralApplicationException exception
+                    = new GeneralApplicationException(" Error executing "
+                            + "prepared statement: " + ex.getMessage(), ex);
+            throw exception;
         } finally {
             if (statement != null) {
                 try {
@@ -186,6 +210,11 @@ public class DatabaseHandler implements DatabaseHandlerLocal {
                 } catch (SQLException ex) {
                     System.out.println("*** [DatabaseHandler] Error closing "
                             + "prepared statement: " + ex.getMessage());
+                    GeneralApplicationException exception
+                            = new GeneralApplicationException(" Error closing "
+                                    + "prepared statement: " 
+                                    + ex.getMessage(), ex);
+                    throw exception;                
                 }
             }
             if (con != null) {
@@ -194,6 +223,11 @@ public class DatabaseHandler implements DatabaseHandlerLocal {
                 } catch (SQLException ex) {
                     System.out.println("*** [DatabaseHandler] Error closing "
                             + "database connection: " + ex.getMessage());
+                    GeneralApplicationException exception
+                            = new GeneralApplicationException(" Error closing "
+                                    + "database connection: " 
+                                    + ex.getMessage(), ex);
+                    throw exception;                      
                 }
             }
         }
@@ -201,7 +235,8 @@ public class DatabaseHandler implements DatabaseHandlerLocal {
     }
     
     
-    private Double stringToDouble(String stringVal) {
+    private Double stringToDouble(String stringVal) 
+            throws GeneralApplicationException {
         if (stringVal == null || stringVal.trim().isEmpty()) {
             return (double) 0;
         }
@@ -212,7 +247,11 @@ public class DatabaseHandler implements DatabaseHandlerLocal {
         } catch (NumberFormatException ex) {
             System.out.println("Value '" + stringVal + "' cannot be "
                     + "converted to Double");
+            GeneralApplicationException exception
+                    = new GeneralApplicationException("Value '" 
+                            + stringVal + "' cannot be converted to Double. "
+                            + ex.getMessage(), ex);
+            throw exception;
         }
-        return null;
     }
 }

@@ -57,14 +57,17 @@
         <br/>
         <!-- Data upload/download block. -->
         <div>
-            <form method="post" action="FileUploadServlet" enctype="multipart/form-data">
+            <!-- "upload.do" is a url pattern for file uploading servlet. 
+            Can be defined in web.xml deployement descriptor of in @WebServlet 
+            servlet annotation. -->
+            <form method="post" action="upload.do" enctype="multipart/form-data">
                 Select file to upload:
                         <br/>
                         <br/>
                     <input type="file" name="file" id="file-1" class="inputfile inputfile-1" data-multiple-caption="{count} files selected" multiple="">                    
                     <label for="file-1">
                         <span>Click to select file ...</span>
-                    </label>     
+                    </label>
 
                         <br/>
                         <br/>
@@ -73,7 +76,11 @@
                         <br/>
                         <br/>
             </form>
-            <form method="post" action="FileDownloadServlet">
+
+            <!-- "download.do" is a url pattern for file uploading servlet. 
+            Can be defined in web.xml deployement descriptor of in @WebServlet 
+            servlet annotation. -->
+            <form method="post" action="download.do">
                 Download data into a file:
                         <br/>
                         <br/>
@@ -82,6 +89,15 @@
                         <br/>
                         <br/>
             </form>
+            
+            <!-- JSTL code to display the result of operation received as
+            http request attribute -->
+            <c:if test="${not empty uploadResult}">
+                <h4><c:out value="File upload result: ${uploadResult}"></c:out></h4>
+            </c:if>            
+            <c:if test="${not empty downloadResult}">
+                <h4><c:out value="File download result: ${downloadResult}"></c:out></h4>
+            </c:if>                
         </div>
         
         <!-- Database MYDATA table display. -->

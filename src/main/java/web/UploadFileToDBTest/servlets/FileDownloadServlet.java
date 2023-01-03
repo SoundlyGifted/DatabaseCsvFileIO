@@ -1,4 +1,3 @@
-
 package web.UploadFileToDBTest.servlets;
 
 import com.opencsv.CSVWriter;
@@ -15,9 +14,11 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.apache.commons.csv.*;
 import web.UploadFileToDBTest.common.DatabaseHandlerLocal;
 import web.UploadFileToDBTest.csvData.CSVFileData;
+import web.UploadFileToDBTest.exceptions.GeneralApplicationException;
 
 /**
  * This Servlet handles ".csv" file download from Database requests based on 
@@ -25,7 +26,7 @@ import web.UploadFileToDBTest.csvData.CSVFileData;
  * 
  * @author SoundlyGifted
  */
-@WebServlet(name = "FileDownloadServlet", urlPatterns = {"/FileDownloadServlet"})
+@WebServlet(name = "FileDownloadServlet", urlPatterns = {"/download.do"})
 public class FileDownloadServlet extends HttpServlet {
 
     @EJB
@@ -48,21 +49,34 @@ public class FileDownloadServlet extends HttpServlet {
         String home = System.getProperty("user.home");
         File outputFile = new File(home + "/Downloads/" + downloadFileName + ".csv");
 
-        CSVFileData csvFileData = databaseHandler.selectAll();
+        int downloadSuccessful = 0;
+        HttpSession session = request.getSession();
+        try {
+            CSVFileData csvFileData = databaseHandler.selectAll();
 
-        String downloadMethodSelected = defineMethodSelected(request);
-        if (downloadFileFromDB(csvFileData, outputFile, 
-                downloadMethodSelected)) {
-            System.out.println("*** [FileDownloadServlet] File Successfully "
-                    + "downloaded using '" + downloadMethodSelected + "' ***");            
-        } else {
-            System.out.println("*** [FileDownloadServlet] File was not "
-                    + "downloaded, attempted to use '" 
-                    + downloadMethodSelected + "' ***");            
+            String downloadMethodSelected = defineMethodSelected(request);
+
+            if (downloadFileFromDB(csvFileData, outputFile,
+                    downloadMethodSelected)) {
+                System.out.println("*** [FileDownloadServlet] File Successfully "
+                        + "downloaded using '" + downloadMethodSelected + "' ***");
+                downloadSuccessful = 1;
+            } else {
+                System.out.println("*** [FileDownloadServlet] File was not "
+                        + "downloaded, attempted to use '"
+                        + downloadMethodSelected + "' ***");
+            }
+        } catch (GeneralApplicationException e) {
+            session.setAttribute("GeneralApplicationException", e.getMessage());
         }
-
-        getServletContext().getRequestDispatcher("/index.jsp").forward(request, 
-                response);
+        
+        /* Using PRG (Post-Redirect-Get) pattern.
+         * Instead of forwarding from doPost() method redirecting to the doGet()
+         * method of another servlet (display servlet).
+         * This is needed to avoid duplicate data submission when user
+         * refreshes the page.        
+         */
+        response.sendRedirect("display.do?sd=" + downloadSuccessful);
     }
 
     
@@ -96,10 +110,15 @@ public class FileDownloadServlet extends HttpServlet {
 
         switch (downloadMethodSelected) {
             case "CommonsCSV":
-                try (CSVPrinter printer = new CSVPrinter(fileWriter, CSVFormat.EXCEL
-                                .withDelimiter(';')
-                                .withHeader(csvFileHeaders.get(0), 
-                                        csvFileHeaders.get(1)))) {
+                
+                CSVFormat csvFormat = CSVFormat.EXCEL;
+                CSVFormat.Builder csvFormatBuilder = csvFormat.builder();
+                csvFormatBuilder.setDelimiter(';');
+                csvFormatBuilder.setHeader(csvFileHeaders.get(0), 
+                        csvFileHeaders.get(1));            
+                
+                try (CSVPrinter printer 
+                        = new CSVPrinter(fileWriter, csvFormatBuilder.build())) {
                         for (Map<String, String> record : recordList) {
                             printer.printRecord(record.get(csvFileHeaders.get(0)),
                                     record.get(csvFileHeaders.get(1)));
@@ -147,7 +166,8 @@ public class FileDownloadServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        getServletContext().getRequestDispatcher("/index.jsp").forward(request, 
+                response);
     }
 
     /**

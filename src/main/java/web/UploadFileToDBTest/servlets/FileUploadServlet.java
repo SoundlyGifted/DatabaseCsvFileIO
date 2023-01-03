@@ -1,4 +1,3 @@
-
 package web.UploadFileToDBTest.servlets;
 
 import java.io.IOException;
@@ -18,8 +17,10 @@ import org.apache.commons.csv.*;
 import org.apache.commons.io.input.*;
 import com.opencsv.*;
 import com.opencsv.exceptions.CsvValidationException;
+import jakarta.servlet.http.HttpSession;
 import web.UploadFileToDBTest.common.DatabaseHandlerLocal;
 import web.UploadFileToDBTest.csvData.CSVFileData;
+import web.UploadFileToDBTest.exceptions.GeneralApplicationException;
 
 /**
  * This Servlet handles ".csv" file upload to Database requests based on 
@@ -27,7 +28,7 @@ import web.UploadFileToDBTest.csvData.CSVFileData;
  * 
  * @author SoundlyGifted
  */
-@WebServlet(name = "FileUploadServlet", urlPatterns = {"/FileUploadServlet"})
+@WebServlet(name = "FileUploadServlet", urlPatterns = {"/upload.do"})
 @MultipartConfig(maxFileSize = 16177215)
 public class FileUploadServlet extends HttpServlet {
 
@@ -52,18 +53,30 @@ public class FileUploadServlet extends HttpServlet {
         Post request. */
         Part filePart = request.getPart("file");
         
-        String parsingMethodSelected = defineParsingMethodSelected(request);
-       
-        if (uploadFileToDB(filePart, parsingMethodSelected)) {
-            System.out.println("*** [FileUploadServlet] File Successfully "
-                    + "uploaded using '" + parsingMethodSelected + "' ***");
-        } else {
-            System.out.println("*** [FileUploadServlet] File was not uploaded, "
-                    + "attempted to use '" + parsingMethodSelected + "' ***");
+        int uploadSuccessful = 0;
+        HttpSession session = request.getSession();
+        try {
+            String parsingMethodSelected = defineParsingMethodSelected(request);
+
+            if (uploadFileToDB(filePart, parsingMethodSelected)) {
+                System.out.println("*** [FileUploadServlet] File Successfully "
+                        + "uploaded using '" + parsingMethodSelected + "' ***");
+                uploadSuccessful = 1;
+            } else {
+                System.out.println("*** [FileUploadServlet] File was not uploaded, "
+                        + "attempted to use '" + parsingMethodSelected + "' ***");
+            }
+        } catch (GeneralApplicationException e) {
+            session.setAttribute("GeneralApplicationException", e.getMessage());
         }
         
-        getServletContext().getRequestDispatcher("/index.jsp").forward(request, 
-                response);
+        /* Using PRG (Post-Redirect-Get) pattern.
+         * Instead of forwarding from doPost() method redirecting to the doGet()
+         * method of another servlet (display servlet).
+         * This is needed to avoid duplicate data submission when user
+         * refreshes the page.        
+         */
+        response.sendRedirect("display.do?su=" + uploadSuccessful);
     }
     
     private String defineParsingMethodSelected (HttpServletRequest request) {
@@ -86,7 +99,7 @@ public class FileUploadServlet extends HttpServlet {
     }
 
     private boolean uploadFileToDB(Part filePart, String parsingMethodSelected)
-            throws IOException {
+            throws IOException, GeneralApplicationException {
         /* Collection to keep records from csv-file.
         Each record is a Map with a csv table values mapped to 
         the csv table headers (Map<String, String>). */
@@ -134,10 +147,17 @@ public class FileUploadServlet extends HttpServlet {
                 } else {
                     System.out.println("*** [FileUploadServlet.uploadFileToDB] "
                             + "This is not a CSV file ***");
+                    GeneralApplicationException exception
+                            = new GeneralApplicationException("The selected "
+                                    + "file is not a CSV file.");
+                    throw exception;
                 }
             } else {
                 System.out.println("*** [FileUploadServlet.uploadFileToDB] "
                         + "No file selected ***");
+                GeneralApplicationException exception
+                        = new GeneralApplicationException("No file selected.");
+                throw exception;
             }
         }
         return false;
@@ -198,7 +218,7 @@ public class FileUploadServlet extends HttpServlet {
     }
     
     private CSVFileData parseWithOpenCSV(Part filePart)
-            throws IOException {
+            throws IOException, GeneralApplicationException {
         /* Collection to keep records from csv-file.
         Each record is a Map with a csv table values mapped to 
         the csv table headers (Map<String, String>). */
@@ -240,6 +260,11 @@ public class FileUploadServlet extends HttpServlet {
                     System.out.println("*** [FileUploadServlet"
                             + ".parseWithOpenCSV] + csv file contains rows "
                             + "with invalid values. ***");
+                    GeneralApplicationException exception 
+                            = new GeneralApplicationException("csv file "
+                                    + "contains invalid values ... " 
+                                    + ex.getMessage());
+                    throw exception;
                 }
             }
         }
@@ -260,7 +285,8 @@ public class FileUploadServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        getServletContext().getRequestDispatcher("/index.jsp").forward(request, 
+                response);
     }
 
     
