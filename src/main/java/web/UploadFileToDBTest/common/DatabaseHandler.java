@@ -207,7 +207,7 @@ public class DatabaseHandler implements DatabaseHandlerLocal {
         }
         stringVal = stringVal.replaceAll(",", ".");
         try {
-            Double doubleValue = Double.parseDouble(stringVal);
+            Double doubleValue = Double.valueOf(stringVal);
             return doubleValue;
         } catch (NumberFormatException ex) {
             System.out.println("Value '" + stringVal + "' cannot be "

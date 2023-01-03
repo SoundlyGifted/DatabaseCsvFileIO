@@ -158,12 +158,18 @@ public class FileUploadServlet extends HttpServlet {
             if (inputStream != null) {
                 try (InputStreamReader inputStreamReader
                         = new InputStreamReader(inputStream, "UTF-8")) {
+                    
                     // Parsing CSV file using Apache Commons CSV library.
+                    
+                    CSVFormat csvFormat = CSVFormat.EXCEL;
+                    CSVFormat.Builder csvFormatBuilder = csvFormat.builder();
+                    csvFormatBuilder.setDelimiter(';');
+                    csvFormatBuilder.setHeader().setSkipHeaderRecord(true);
+                    
                     try (org.apache.commons.csv.CSVParser csvParser 
                             = new org.apache.commons.csv
-                                    .CSVParser(inputStreamReader, CSVFormat
-                                            .EXCEL.withDelimiter(';')
-                                    .withFirstRecordAsHeader())) {
+                                    .CSVParser(inputStreamReader, 
+                                            csvFormatBuilder.build())) {
                         Map<String, String> rec;
                         for (CSVRecord record : csvParser) {
                             rec = record.toMap();

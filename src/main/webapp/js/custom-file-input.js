@@ -1,6 +1,11 @@
 /*
 	By Osvaldas Valutis, www.osvaldas.info
 	Available for use under the MIT License
+
+    The script to indicate whether the file(s) was selected.
+    The text of a label becomes the name of the selected file. 
+    If there were multiple files selected, the text will tell us how many of 
+    them were selected.
 */
 
 'use strict';

@@ -37,6 +37,11 @@
         <link rel="stylesheet" type="text/css" href="css/inputFileStyle.css">
         <link rel="stylesheet" type="text/css" href="css/generalStyles.css">
         
+        <!-- Script for the case when JavaScript is not available (it will be
+        not possible to indicate the selected file(s).
+        This script replaces ".no-js" class with ".js" so that JS makes the 
+        indication possible, otherwise the default look will be left for the 
+        sake of usability. -->
         <script>
             (function(e,t,n) {
                 var r=e.querySelectorAll("html")[0];
