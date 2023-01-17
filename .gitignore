@@ -64,11 +64,13 @@ local.properties
 ##############################
 ## NetBeans
 ##############################
+old_nbproject_(ant)
 **/nbproject/private/
 build/
 nbbuild/
 dist/
 nbdist/
+old_build_(ant).xml
 nbactions.xml
 nb-configuration.xml
 
