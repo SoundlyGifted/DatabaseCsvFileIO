@@ -1,4 +1,4 @@
-package web.UploadFileToDBTest.servlets;
+package web.servlets;
 
 import jakarta.servlet.http.HttpServlet;
 import java.io.IOException;

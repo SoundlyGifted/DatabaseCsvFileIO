@@ -1,4 +1,4 @@
-package web.UploadFileToDBTest.csvData;
+package web.csvData;
 
 import java.util.ArrayList;
 import java.util.HashMap;

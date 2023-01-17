@@ -1,4 +1,4 @@
-package web.UploadFileToDBTest.exceptions;
+package web.exceptions;
 
 /**
  * Custom genearal application exception class.
