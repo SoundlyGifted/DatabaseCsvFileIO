@@ -64,6 +64,7 @@ local.properties
 ##############################
 ## NetBeans
 ##############################
+drafts/
 old_nbproject_(ant)
 src/conf
 **/nbproject/private/
