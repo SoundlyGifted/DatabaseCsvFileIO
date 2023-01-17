@@ -65,6 +65,7 @@ local.properties
 ## NetBeans
 ##############################
 old_nbproject_(ant)
+src/conf
 **/nbproject/private/
 build/
 nbbuild/
