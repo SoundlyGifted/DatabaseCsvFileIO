@@ -1,7 +1,7 @@
-package web.common;
+package web.process.database;
 
 import jakarta.ejb.Local;
-import web.csvData.CSVFileData;
+import web.process.csvData.CSVFileData;
 import web.exceptions.GeneralApplicationException;
 
 /**

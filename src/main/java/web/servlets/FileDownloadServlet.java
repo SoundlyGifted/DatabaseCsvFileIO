@@ -1,12 +1,8 @@
 package web.servlets;
 
-import com.opencsv.CSVWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import jakarta.ejb.EJB;
 import jakarta.servlet.ServletException;
@@ -15,10 +11,10 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import org.apache.commons.csv.*;
-import web.common.DatabaseHandlerLocal;
-import web.csvData.CSVFileData;
+import web.process.database.DatabaseHandlerLocal;
+import web.process.csvData.CSVFileData;
 import web.exceptions.GeneralApplicationException;
+import web.process.download.AppCSVDownloader;
 
 /**
  * This Servlet handles ".csv" file download from Database requests based on 
@@ -31,6 +27,9 @@ public class FileDownloadServlet extends HttpServlet {
 
     @EJB
     private DatabaseHandlerLocal databaseHandler;
+    
+    @EJB
+    private AppCSVDownloader appCSVDownloader;
     
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -52,10 +51,13 @@ public class FileDownloadServlet extends HttpServlet {
         int downloadSuccessful = 0;
         HttpSession session = request.getSession();
         try {
+            // Getting the records from the database.
             CSVFileData csvFileData = databaseHandler.selectAll();
-
+            // Getting the selected download method from the Request.
             String downloadMethodSelected = defineMethodSelected(request);
-
+            /* Downloading the data into the csv-file using the selected 
+             * download method.
+             */
             if (downloadFileFromDB(csvFileData, outputFile,
                     downloadMethodSelected)) {
                 System.out.println("*** [FileDownloadServlet] File Successfully "
@@ -99,58 +101,19 @@ public class FileDownloadServlet extends HttpServlet {
         return downloadMethodSelected;
     }
     
+    
     private boolean downloadFileFromDB(CSVFileData csvFileData, File outputFile, 
             String downloadMethodSelected) throws IOException {
-        ArrayList<String> csvFileHeaders = csvFileData
-                .getAllowedCSVFileHeaders();
-        List<Map<String, String>> recordList = csvFileData
-                .getRecordListWithCSVFileHeaders();        
-
-        FileWriter fileWriter = new FileWriter(outputFile);
-
         switch (downloadMethodSelected) {
             case "CommonsCSV":
-                
-                CSVFormat csvFormat = CSVFormat.EXCEL;
-                CSVFormat.Builder csvFormatBuilder = csvFormat.builder();
-                csvFormatBuilder.setDelimiter(';');
-                csvFormatBuilder.setHeader(csvFileHeaders.get(0), 
-                        csvFileHeaders.get(1));            
-                
-                try (CSVPrinter printer 
-                        = new CSVPrinter(fileWriter, csvFormatBuilder.build())) {
-                        for (Map<String, String> record : recordList) {
-                            printer.printRecord(record.get(csvFileHeaders.get(0)),
-                                    record.get(csvFileHeaders.get(1)));
-                        }
-                        printer.flush();
-                }
-                break;
+                return appCSVDownloader
+                        .downloadWithCommonsCSV(csvFileData, outputFile);
             case "OpenCSV":
-                try (CSVWriter writer = new CSVWriter(fileWriter, ';', 
-                        CSVWriter.NO_QUOTE_CHARACTER, 
-                        CSVWriter.DEFAULT_ESCAPE_CHARACTER, 
-                        CSVWriter.DEFAULT_LINE_END)) {
-                    // writing headers first.
-                    String[] headers = {csvFileHeaders.get(0), 
-                        csvFileHeaders.get(1)};
-                    writer.writeNext(headers);
-                    
-                    // then writing values of each record one by one.
-                    for (Map<String, String> record : recordList) {
-                        String[] values = {record.get(csvFileHeaders.get(0)),
-                                    record.get(csvFileHeaders.get(1))};
-                        writer.writeNext(values);
-                    }
-                    writer.flush();
-                }
-                break;
-            case "SomeOtherMethod":
-                break;
+                return appCSVDownloader
+                        .downloadWithOpenCSV(csvFileData, outputFile);
             default:
-                break;
+                return false;
         }
-        return true;
     }
     
     
