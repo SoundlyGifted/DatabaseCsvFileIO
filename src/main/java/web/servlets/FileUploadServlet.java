@@ -15,7 +15,7 @@ import jakarta.servlet.http.HttpSession;
 import web.process.database.DatabaseHandlerLocal;
 import web.process.csvData.CSVFileData;
 import web.exceptions.GeneralApplicationException;
-import web.process.parse.AppCSVParser;
+import web.process.parse.AppCSVParserLocal;
 
 /**
  * This Servlet handles ".csv" file upload to Database requests based on 
@@ -31,7 +31,7 @@ public class FileUploadServlet extends HttpServlet {
     private DatabaseHandlerLocal databaseHandler;
     
     @EJB
-    private AppCSVParser appCSVParser;
+    private AppCSVParserLocal appCSVParser;
     
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>

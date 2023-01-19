@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpSession;
 import web.process.database.DatabaseHandlerLocal;
 import web.process.csvData.CSVFileData;
 import web.exceptions.GeneralApplicationException;
-import web.process.download.AppCSVDownloader;
+import web.process.download.AppCSVDownloaderLocal;
 
 /**
  * This Servlet handles ".csv" file download from Database requests based on 
@@ -27,10 +27,10 @@ public class FileDownloadServlet extends HttpServlet {
 
     @EJB
     private DatabaseHandlerLocal databaseHandler;
-    
+
     @EJB
-    private AppCSVDownloader appCSVDownloader;
-    
+    private AppCSVDownloaderLocal appCSVDownloader;
+   
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
