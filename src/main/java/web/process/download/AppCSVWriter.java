@@ -19,13 +19,13 @@ import web.process.csvData.CSVFileData;
  * @author SoundlyGifted
  */
 @Stateless
-public class AppCSVDownloader implements AppCSVDownloaderLocal {
+public class AppCSVWriter implements AppCSVWriterLocal {
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean downloadWithCommonsCSV(CSVFileData csvFileData, File outputFile)
+    public boolean writeWithCommonsCSV(CSVFileData csvFileData, File outputFile)
             throws IOException {
         ArrayList<String> csvFileHeaders = csvFileData
                 .getAllowedCSVFileHeaders();
@@ -55,7 +55,7 @@ public class AppCSVDownloader implements AppCSVDownloaderLocal {
      * {@inheritDoc}
      */    
     @Override
-    public boolean downloadWithOpenCSV(CSVFileData csvFileData, File outputFile)
+    public boolean writeWithOpenCSV(CSVFileData csvFileData, File outputFile)
             throws IOException {
         ArrayList<String> csvFileHeaders = csvFileData
                 .getAllowedCSVFileHeaders();

@@ -12,7 +12,7 @@ import web.process.csvData.CSVFileData;
  * @author SoundlyGifted
  */
 @Local
-public interface AppCSVDownloaderLocal {
+public interface AppCSVWriterLocal {
     
     /**
      * This method writes csv data into a csv-file using Apache Commons libraries.
@@ -23,7 +23,7 @@ public interface AppCSVDownloaderLocal {
      * otherwise.
      * @throws IOException 
      */
-    public boolean downloadWithCommonsCSV(CSVFileData csvFileData, File outputFile) 
+    public boolean writeWithCommonsCSV(CSVFileData csvFileData, File outputFile) 
             throws IOException;
     
     /**
@@ -35,6 +35,6 @@ public interface AppCSVDownloaderLocal {
      * otherwise.
      * @throws IOException 
      */
-    public boolean downloadWithOpenCSV(CSVFileData csvFileData, File outputFile) 
+    public boolean writeWithOpenCSV(CSVFileData csvFileData, File outputFile) 
             throws IOException;
 }
