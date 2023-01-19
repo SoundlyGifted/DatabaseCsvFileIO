@@ -13,12 +13,17 @@ import org.apache.commons.csv.CSVPrinter;
 import web.process.csvData.CSVFileData;
 
 /**
- *
+ * This Bean contains implementation of methods that are used to write a csv 
+ * data into a csv-file.
+ * 
  * @author SoundlyGifted
  */
 @Stateless
 public class AppCSVDownloader implements AppCSVDownloaderLocal {
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean downloadWithCommonsCSV(CSVFileData csvFileData, File outputFile)
             throws IOException {
@@ -46,6 +51,9 @@ public class AppCSVDownloader implements AppCSVDownloaderLocal {
         return true;
     }
     
+    /**
+     * {@inheritDoc}
+     */    
     @Override
     public boolean downloadWithOpenCSV(CSVFileData csvFileData, File outputFile)
             throws IOException {

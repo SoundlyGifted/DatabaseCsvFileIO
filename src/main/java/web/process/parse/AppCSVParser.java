@@ -24,7 +24,10 @@ import web.process.csvData.CSVFileData;
  */
 @Stateless
 public class AppCSVParser implements AppCSVParserLocal {
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public CSVFileData parseWithCommonsCSV(Part filePart) throws IOException {
         /* Collection to keep records from csv-file.
@@ -80,7 +83,10 @@ public class AppCSVParser implements AppCSVParserLocal {
         }
         return csvFileData;
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public CSVFileData parseWithOpenCSV(Part filePart) 
             throws IOException, GeneralApplicationException {
