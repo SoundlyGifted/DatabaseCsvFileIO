@@ -24,7 +24,7 @@ import web.exceptions.GeneralApplicationException;
 public class DatabaseHandler implements DatabaseHandlerLocal {
 
     private final String dbURL 
-            = "jdbc:derby://localhost:1527/UploadFileToDBTestDB";
+            = "jdbc:derby://localhost:1527/DatabaseCsvFileIOAppDB";
     private final String dbUser = "app";
     private final String dpPass = "app";
     
