@@ -1,17 +1,3 @@
-<!-- Used sources:
-1. Custom input file.
-    https://tympanus.net/codrops/2015/09/15/styling-customizing-file-inputs-smart-way/
-    Also check out
-    https://dev.to/faddalibrahim/how-to-create-a-custom-file-upload-button-using-html-css-and-javascript-1c03
-2. Uploading file to database. Multipart/form-data
-    https://www.codejava.net/java-ee/servlet/java-file-upload-example-with-servlet-30-api
-    https://www.codejava.net/coding/upload-files-to-database-servlet-jsp-mysql
-    https://www.codejava.net/java-se/networking/upload-files-by-sending-multipart-request-programmatically
-3. Apache Commons CSV
-    https://commons.apache.org/proper/commons-csv/user-guide.html
-    https://stackabuse.com/reading-and-writing-csvs-in-java-with-apache-commons-csv/
--->
-
 <%@page import="java.io.*, java.util.*, java.sql.*"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -21,7 +7,7 @@
 <html lang="en" class="js"> 
     <!-- JSTL database connection -->
     <sql:setDataSource driver="org.apache.derby.jdbc.ClientDriver"
-                       url="jdbc:derby://localhost:1527/UploadFileToDBTestDB"
+                       url="jdbc:derby://localhost:1527/DatabaseCsvFileIOAppDB"
                        user="app"
                        password="app"
                        var="JSTLDBConnection"/>
@@ -33,10 +19,11 @@
     
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Database Upload/Download File Test Application</title>
-        <link rel="stylesheet" type="text/css" href="css/inputFileStyle.css">
-        <link rel="stylesheet" type="text/css" href="css/generalStyles.css">
+        <title>Web Application to read/write csv-file from/to a database</title>
         
+        <link rel="stylesheet" type="text/css" href="css/generalStyles.css">
+        <link rel="stylesheet" type="text/css" href="css/inputFileStyle.css">
+
         <!-- Script for the case when JavaScript is not available (it will be
         not possible to indicate the selected file(s).
         This script replaces ".no-js" class with ".js" so that JS makes the 
@@ -55,49 +42,42 @@
     <body>
         <h2>Database Upload/Download File Test Application</h2>
         <br/>
+        
+        <br/>
+        <br/>
         <!-- Data upload/download block. -->
         <div>
-            <!-- "upload.do" is a url pattern for file uploading servlet. 
+            <!-- "process.do" is a url pattern for the processing servlet. 
             Can be defined in web.xml deployement descriptor of in @WebServlet 
             servlet annotation. -->
-            <form method="post" action="upload.do" enctype="multipart/form-data">
-                Select file to upload:
-                        <br/>
-                        <br/>
-                    <input type="file" name="file" id="file-1" class="inputfile inputfile-1" data-multiple-caption="{count} files selected" multiple="">                    
-                    <label for="file-1">
-                        <span>Click to select file ...</span>
-                    </label>
+            <form method="post" action="process.do" enctype="multipart/form-data">
+                <input type="file" name="file" id="file-1" class="inputfile inputfile-1" data-multiple-caption="{count} files selected" multiple="">                    
+                <label for="file-1">
+                    <span>Click to select csv-file ...</span>
+                </label>
+                <br/>
+                <br/>
+                <select name = "selected_method" class="inputTextBox">
+                    <option value="" 
+                            selected disabled hidden>
+                        Choose Library
+                    </option>                            
+                    <option value="CommonsCSV">
+                        Apache Commons CSV
+                    </option>
+                    <option value="OpenCSV">
+                        Open CSV
+                    </option>
+                </select>
+                <input type="submit" name="clicked_Upload" value="Upload" class="button"/>
+                <input type="submit" name="clicked_Download" value="Download" class="button"/>
+                <br/>
+                <br/>
+            </form>            
 
-                        <br/>
-                        <br/>
-                    <input type="submit" name="UploadWithCommonsCSV" value="Upload (Apache Commons CSV Library)" class="button"/>
-                    <input type="submit" name="UploadWithOpenCSV" value="Upload (Open CSV Library)" class="button"/>
-                        <br/>
-                        <br/>
-            </form>
-
-            <!-- "download.do" is a url pattern for file uploading servlet. 
-            Can be defined in web.xml deployement descriptor of in @WebServlet 
-            servlet annotation. -->
-            <form method="post" action="download.do">
-                Download data into a file:
-                        <br/>
-                        <br/>
-                    <input type="submit" name="DownloadWithCommonsCSV" value="Download (Apache Commons CSV Library)" class="button"/>
-                    <input type="submit" name="DownloadWithOpenCSV" value="Download (Open CSV Library)" class="button"/>
-                        <br/>
-                        <br/>
-            </form>
-            
             <!-- JSTL code to display the result of operation received as
             http request attribute -->
-            <c:if test="${not empty uploadResult}">
-                <h4><c:out value="File upload result: ${uploadResult}"></c:out></h4>
-            </c:if>            
-            <c:if test="${not empty downloadResult}">
-                <h4><c:out value="File download result: ${downloadResult}"></c:out></h4>
-            </c:if>                
+            <h4><c:out value="${operationResultDesc}"></c:out></h4> 
         </div>
         
         <!-- Database MYDATA table display. -->

@@ -49,36 +49,35 @@ public class DisplayServlet extends HttpServlet {
             throws ServletException, IOException {
         
         HttpSession session = request.getSession();
-        Integer uploadSuccessful;
-        try {
-            uploadSuccessful = Integer.valueOf(request.getParameter("su"));
-            if (uploadSuccessful > 0) {
-                request.setAttribute("uploadResult",
+        
+        Integer anyMethodSelected = Integer.valueOf(request.getParameter("sa"));
+        Integer uploadSuccessful = Integer.valueOf(request.getParameter("su"));
+        Integer downloadSuccessful = Integer.valueOf(request.getParameter("sd"));
+        
+        Object exception = session.getAttribute("GeneralApplicationException");
+        
+        if (anyMethodSelected == 0) {
+            request.setAttribute("operationResultDesc", 
+                    "No method was selected.");
+        } else {
+            if (uploadSuccessful > 0 && downloadSuccessful == 0) {
+                request.setAttribute("operationResultDesc",
                         "Records were added to the database");
-            } else {
-                request.setAttribute("uploadResult",
-                        "Records were not added: " 
-                                + session.getAttribute("GeneralApplicationException"));
             }
-        } catch (NumberFormatException e) {
-            uploadSuccessful = null;
+            if (downloadSuccessful > 0 && uploadSuccessful == 0) {
+                request.setAttribute("operationResultDesc",
+                        "Records were downloaded as a file into your downloads "
+                        + "folder");
+            }
+            if (exception != null) {
+                request.setAttribute("operationResultDesc", 
+                        "Operation was unsuccessful: " + exception);
+            }
         }
         
-        Integer downloadSuccessful;
-        try {
-            downloadSuccessful = Integer.valueOf(request.getParameter("sd"));
-            if (downloadSuccessful > 0) {
-                request.setAttribute("downloadResult",
-                        "Records were downloaded as a file into your downloads folder");
-            } else {
-                request.setAttribute("downloadResult",
-                        "Records were not downloaded as a file: " 
-                                + session.getAttribute("GeneralApplicationException"));
-            }
-        } catch (NumberFormatException e) {
-            downloadSuccessful = null;
-        }
-
+        // Removing exception attribute for the next request.
+        session.removeAttribute("GeneralApplicationException");
+        
         getServletContext().getRequestDispatcher("/index.jsp")
                 .forward(request, response);
     }

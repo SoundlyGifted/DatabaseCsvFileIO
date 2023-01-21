@@ -1,3 +1,7 @@
+* {
+    font-family: Verdana, sans-serif;
+}
+
 .outputTable {
     width: 35%; 
     font-family: "Arial Black", Gadget, sans-serif;
@@ -39,14 +43,34 @@
 }
 
 
+.inputTextBox{
+    outline: none;
+    text-decoration:none; 
+    text-align:left;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 0.5rem 1.0rem;
+    border: solid 2px #00aaff; 
 
-/*.button {
-    color: white;
-    background-color: cadetblue;
-    
+    color:cadetblue; 
+    background:#ffffff; 
+
+    transition:  all 0.08s linear;
+}
+
+.inputTextBox:hover{
+    border: solid 2px #0082a4; 
+}
+
+.inputTextBox:focus{
+    border: solid 2px #0082a4;
+    color: #0082a4;
+}
+
+
+.button {
     max-width: 80%;
-    font-size: 1.0rem;
-     20px 
+    font-size: 0.9rem;
     font-weight: 700;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -54,13 +78,15 @@
     display: inline-block;
     overflow: hidden;
     padding: 0.625rem 1.25rem;
-     10px 20px     
-}*/
+    
+    color: white;
+    background-color: cadetblue;
+    
+    border: none
+}
 
-/*.button:focus,
-.button.has-focus 
+.button:focus,
+.button.has-focus,
 .button:hover {
-    outline: 1px dotted #000;
-    outline: -webkit-focus-ring-color auto 5px;
     background-color: #0082a4;
-}*/
+}
