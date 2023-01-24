@@ -19,7 +19,7 @@
     
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Web Application to read/write csv-file from/to a database</title>
+        <title>Web App to read/write csv-file from/to a database</title>
         
         <link rel="stylesheet" type="text/css" href="css/generalStyles.css">
         <link rel="stylesheet" type="text/css" href="css/inputFileStyle.css">
@@ -40,54 +40,70 @@
     </head>
     
     <body>
-        <h2>Database Upload/Download File Test Application</h2>
+        <div>
+            <h2 style="color: #cccccc">Database Upload / Download csv-file [Example]</h2>
+            <hr style="border-color: #0082a4;">            
+        </div>
+
         <br/>
         
-        <br/>
-        <br/>
         <!-- Data upload/download block. -->
         <div>
             <!-- "process.do" is a url pattern for the processing servlet. 
             Can be defined in web.xml deployement descriptor of in @WebServlet 
             servlet annotation. -->
             <form method="post" action="process.do" enctype="multipart/form-data">
-                <input type="file" name="file" id="file-1" class="inputfile inputfile-1" data-multiple-caption="{count} files selected" multiple="">                    
-                <label for="file-1">
-                    <span>Click to select csv-file ...</span>
-                </label>
-                <br/>
-                <br/>
-                <select name = "selected_method" class="inputTextBox">
-                    <option value="" 
-                            selected disabled hidden>
-                        Choose Library
-                    </option>                            
-                    <option value="CommonsCSV">
-                        Apache Commons CSV
-                    </option>
-                    <option value="OpenCSV">
-                        Open CSV
-                    </option>
-                </select>
-                <input type="submit" name="clicked_Upload" value="Upload" class="button"/>
-                <input type="submit" name="clicked_Download" value="Download" class="button"/>
-                <br/>
-                <br/>
-            </form>            
+                <div class="div-in-select">
+                    <select name = "selected_method" class="inputSelectBox">
+                        <option value="" 
+                                selected disabled hidden>
+                            Choose Library
+                        </option>                            
+                        <option value="CommonsCSV">
+                            Apache Commons CSV
+                        </option>
+                        <option value="OpenCSV">
+                            Open CSV
+                        </option>
+                    </select>                    
+                </div>
 
-            <!-- JSTL code to display the result of operation received as
-            http request attribute -->
-            <h4><c:out value="${operationResultDesc}"></c:out></h4> 
+                <div class="div-in-upload">
+                    <p style="font-size: 0.8rem; font-weight: bold;">Upload csv data to database</p>
+                    <br/>
+                    <input type="file" name="file" id="file-1" class="inputfile inputfile-1" data-multiple-caption="{count} files selected" multiple="">                    
+                    <label for="file-1">
+                        <span>Select csv ...</span>
+                    </label>
+                    <img src="img/arrow.ico" style="width: 1.5rem; height: 1.5rem; display:inline-block; margin-right: 0.625rem; vertical-align: middle;">
+                    <input type="submit" name="clicked_Upload" value="Upload" class="button"/>                    
+                </div>
+
+                <div class="div-in-download">
+                    <p style="font-size: 0.8rem; font-weight: bold;">Download database data to csv</p>
+                    <br/>
+                    <input type="submit" name="clicked_Download" value="Download" class="button"/>
+                </div>
+            </form>            
+            
+            <div class="div-out-message">
+                <!-- JSTL code to display the result of operation received as
+             http request attribute -->
+                <c:if test="${operationResultDesc == null}">
+                    <h4>No operation performed yet ...</h4>
+                </c:if>
+                <h4><c:out value="${operationResultDesc}"></c:out></h4>  
+            </div>
         </div>
         
         <!-- Database MYDATA table display. -->
-        <div>
+        <div class="div-out-table">
             <table class="outputTable">
-                <caption> MYDATA database table </caption>
+                <caption> Players points [Database table] </caption>
                 <tr style="background-color: cadetblue">
-                    <th>ID</th>
-                    <th>Text Data</th>
-                    <th>Double Data</th>
+                    <th>Record [ID]</th>
+                    <th>Player Name [Text]</th>
+                    <th>Score [Double]</th>
                 </tr>
                 <c:forEach var="row" items="${MYDATAResultSet.rows}">
                     <tr>
