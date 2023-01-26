@@ -51,6 +51,8 @@ public class ProcessServlet extends HttpServlet {
         String clickedUpload = request.getParameter("clicked_Upload");
         String clickedDownload = request.getParameter("clicked_Download");
         String selectedMethod = request.getParameter("selected_method");
+        
+        String clickedClear = request.getParameter("clicked_Clear");
 
         int anyMethodSelected = 0;
         int uploadSuccessful = 0;        
@@ -62,14 +64,14 @@ public class ProcessServlet extends HttpServlet {
             selectedMethod = "";
         }
         
+        HttpSession session;
+        
         if (clickedUpload != null) {
             /* csv-file received from request as a part of "multipart/form-data" 
              * POST request. 
              */
             Part filePart = request.getPart("file");
 
-            HttpSession session = request.getSession();
-            
             try {
                 // Parsing csv-file using the selected method.
                 CSVFileData csvFileData = parseCSVFile(filePart, selectedMethod);
@@ -78,6 +80,7 @@ public class ProcessServlet extends HttpServlet {
                     uploadSuccessful = 1;
                 }
             } catch (GeneralApplicationException|SQLException e) {
+                session = request.getSession();
                 session.setAttribute("GeneralApplicationException", e.getMessage());
             }
         }
@@ -88,8 +91,6 @@ public class ProcessServlet extends HttpServlet {
             String home = System.getProperty("user.home");
             File outputFile = new File(home + "/Downloads/" + downloadFileName + ".csv");
 
-            HttpSession session = request.getSession();
-            
             try {
                 // Getting the records from the database.
                 CSVFileData csvFileData = databaseHandler.selectAll();
@@ -101,6 +102,16 @@ public class ProcessServlet extends HttpServlet {
                     downloadSuccessful = 1;
                 }
             } catch (GeneralApplicationException|SQLException e) {
+                session = request.getSession();
+                session.setAttribute("GeneralApplicationException", e.getMessage());
+            }
+        }
+        
+        if (clickedClear != null) {
+            try {
+                databaseHandler.deleteAll();
+            } catch (GeneralApplicationException e) {
+                session = request.getSession();
                 session.setAttribute("GeneralApplicationException", e.getMessage());
             }
         }

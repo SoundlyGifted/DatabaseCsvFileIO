@@ -90,10 +90,10 @@ public class DBDataHandler implements DBDataHandlerLocal {
                 statement.addBatch();
             }
             statement.executeBatch();
-        } catch (SQLException ex) {
+        } catch (SQLException sqlex) {
             GeneralApplicationException exception 
                     = new GeneralApplicationException("Error executing prepared "
-                            + "statement: " + ex.getMessage(), ex);
+                            + "statement: " + sqlex.getMessage(), sqlex);
             throw exception;
         }
         return true;
@@ -148,8 +148,26 @@ public class DBDataHandler implements DBDataHandlerLocal {
         }
         return csvFileData;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void deleteAll() 
+            throws GeneralApplicationException, IOException {
+        String sql = sqlQueryProvider.getQuery("delete.all.mydata");
+        try (Connection connection = connectionHandler.getDBConnection();
+                Statement statement = connection.createStatement()) {
+            statement.execute(sql);
+        } catch (SQLException sqlex) {
+            GeneralApplicationException exception 
+                    = new GeneralApplicationException("Error executing "
+                            + "statement: " + sqlex.getMessage(), sqlex);
+            throw exception;
+        }
+    }
     
-    
+
     private Double stringToDouble(String stringVal) 
             throws GeneralApplicationException {
         if (stringVal == null || stringVal.trim().isEmpty()) {

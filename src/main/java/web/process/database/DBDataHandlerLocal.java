@@ -39,4 +39,12 @@ public interface DBDataHandlerLocal {
      */
     public CSVFileData selectAll() 
             throws GeneralApplicationException, IOException, SQLException;
+    
+    /**
+     * Deletes all records from the database table.
+     * 
+     * @throws web.exceptions.GeneralApplicationException 
+     * @throws java.io.IOException 
+     */
+    public void deleteAll() throws GeneralApplicationException, IOException;
 }

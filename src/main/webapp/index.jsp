@@ -84,7 +84,7 @@
                     <br/>
                     <input type="submit" name="clicked_Download" value="Download" class="button"/>
                 </div>
-            </form>            
+            </form>
             
             <div class="div-out-message">
                 <!-- JSTL code to display the result of operation received as
@@ -99,7 +99,12 @@
         <!-- Database MYDATA table display. -->
         <div class="div-out-table">
             <table class="outputTable">
-                <caption> Players points [Database table] </caption>
+                <caption> 
+                    <form method="post" action="process.do">
+                        <h4 style="display:inline-block; margin-right: 0.625rem; vertical-align: middle;">Players points [Database table]</h4>
+                        <input type="submit" name="clicked_Clear" value="Clear data" class="button"/>
+                    </form>
+                </caption>
                 <tr style="background-color: cadetblue">
                     <th>Record [ID]</th>
                     <th>Player Name [Text]</th>
