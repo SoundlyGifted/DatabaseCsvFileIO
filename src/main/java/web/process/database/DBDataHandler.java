@@ -1,8 +1,9 @@
 package web.process.database;
 
+import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
+import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,39 +22,25 @@ import web.exceptions.GeneralApplicationException;
  * @author SoundlyGifted
  */
 @Stateless
-public class DatabaseHandler implements DatabaseHandlerLocal {
+public class DBDataHandler implements DBDataHandlerLocal {
 
-    private final String dbURL 
-            = "jdbc:derby://localhost:1527/DatabaseCsvFileIOAppDB";
-    private final String dbUser = "app";
-    private final String dpPass = "app";
+    @EJB
+    private DBConnectionHandlerLocal connectionHandler;
     
-    private Connection getDatabaseConnection() throws SQLException {
-        DriverManager.registerDriver(new org.apache.derby.iapi.jdbc.AutoloadedDriver());
-        return DriverManager.getConnection(dbURL, dbUser, dpPass);        
-    }
+    @EJB
+    private SQLQueryProviderLocal sqlQueryProvider;
     
     /**
      * {@inheritDoc}
      */
     @Override
     public boolean insertMultRecs(CSVFileData csvFileData) 
-            throws GeneralApplicationException {
-        String sql = "INSERT INTO MYDATA (TEXTDATA, DOUBLEDATA) values (?, ?)";
-        Connection con;
-        PreparedStatement statement = null;
-        try {
-            con = getDatabaseConnection();
-        } catch (SQLException ex) {
-            System.out.println("*** [DatabaseHandler] Error establishing "
-                    + "database connection: " + ex.getMessage());
-            GeneralApplicationException exception 
-                    = new GeneralApplicationException("Error establishing "
-                            + "database connection: " + ex.getMessage(), ex);
-            throw exception;
-        }
-        try {
-            statement = con.prepareStatement(sql);
+            throws GeneralApplicationException, IOException, SQLException {
+        
+        String sql = sqlQueryProvider.getQuery("insert.mydata");
+
+        try (Connection connection = connectionHandler.getDBConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
             List<Map<String, String>> csvFileRecordList = csvFileData
                     .getRecordListWithCSVFileHeaders();
             for (Map<String, String> csvFileRecord : csvFileRecordList) {
@@ -104,40 +91,10 @@ public class DatabaseHandler implements DatabaseHandlerLocal {
             }
             statement.executeBatch();
         } catch (SQLException ex) {
-            System.out.println("*** [DatabaseHandler] Error executing prepared "
-                    + "statement: " + ex.getMessage());
             GeneralApplicationException exception 
                     = new GeneralApplicationException("Error executing prepared "
                             + "statement: " + ex.getMessage(), ex);
             throw exception;
-        } finally {
-            csvFileData = null;
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException ex) {
-                    System.out.println("*** [DatabaseHandler] Error closing "
-                            + "prepared statement: " + ex.getMessage());
-                    GeneralApplicationException exception
-                            = new GeneralApplicationException("Error closing "
-                                    + "prepared statement: " 
-                                    + ex.getMessage(), ex);
-                    throw exception;                   
-                }
-            }
-            if (con != null) {
-                try {
-                    con.close();
-                } catch (SQLException ex) {
-                    System.out.println("*** [DatabaseHandler] Error closing "
-                            + "database connection: " + ex.getMessage());
-                    GeneralApplicationException exception
-                            = new GeneralApplicationException("Error closing "
-                                    + "database connection: " 
-                                    + ex.getMessage(), ex);
-                    throw exception;
-                }
-            }
         }
         return true;
     }
@@ -146,27 +103,14 @@ public class DatabaseHandler implements DatabaseHandlerLocal {
      * {@inheritDoc}
      */
     @Override
-    public CSVFileData selectAll() throws GeneralApplicationException {
+    public CSVFileData selectAll() 
+            throws GeneralApplicationException, IOException, SQLException {
+        
         CSVFileData csvFileData = new CSVFileData();
+        String sql = sqlQueryProvider.getQuery("select.all.mydata");
 
-        String sql = "SELECT * FROM MYDATA";
-        Connection con;
-        Statement statement = null;
-
-        try {
-            con = getDatabaseConnection();
-        } catch (SQLException ex) {
-            System.out.println("*** [DatabaseHandler] Error establishing "
-                    + "database connection: " + ex.getMessage());
-            GeneralApplicationException exception
-                    = new GeneralApplicationException("Error establishing "
-                            + "database connection: "
-                            + ex.getMessage(), ex);
-            throw exception;
-        }
-
-        try {
-            statement = con.createStatement();
+        try (Connection connection = connectionHandler.getDBConnection();
+                Statement statement = connection.createStatement()) {
             statement.execute(sql);
             try (ResultSet resultSet = statement.getResultSet()) {
                 // variables that define a database record
@@ -197,39 +141,10 @@ public class DatabaseHandler implements DatabaseHandlerLocal {
                 }
             }
         } catch (SQLException ex) {
-            System.out.println("*** [DatabaseHandler] Error executing prepared "
-                    + "statement: " + ex.getMessage());
             GeneralApplicationException exception
                     = new GeneralApplicationException(" Error executing "
                             + "prepared statement: " + ex.getMessage(), ex);
             throw exception;
-        } finally {
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException ex) {
-                    System.out.println("*** [DatabaseHandler] Error closing "
-                            + "prepared statement: " + ex.getMessage());
-                    GeneralApplicationException exception
-                            = new GeneralApplicationException(" Error closing "
-                                    + "prepared statement: " 
-                                    + ex.getMessage(), ex);
-                    throw exception;                
-                }
-            }
-            if (con != null) {
-                try {
-                    con.close();
-                } catch (SQLException ex) {
-                    System.out.println("*** [DatabaseHandler] Error closing "
-                            + "database connection: " + ex.getMessage());
-                    GeneralApplicationException exception
-                            = new GeneralApplicationException(" Error closing "
-                                    + "database connection: " 
-                                    + ex.getMessage(), ex);
-                    throw exception;                      
-                }
-            }
         }
         return csvFileData;
     }
@@ -245,8 +160,6 @@ public class DatabaseHandler implements DatabaseHandlerLocal {
             Double doubleValue = Double.valueOf(stringVal);
             return doubleValue;
         } catch (NumberFormatException ex) {
-            System.out.println("Value '" + stringVal + "' cannot be "
-                    + "converted to Double");
             GeneralApplicationException exception
                     = new GeneralApplicationException("Value '" 
                             + stringVal + "' cannot be converted to Double. "

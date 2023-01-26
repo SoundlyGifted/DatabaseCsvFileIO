@@ -1,6 +1,8 @@
 package web.process.database;
 
 import jakarta.ejb.Local;
+import java.io.IOException;
+import java.sql.SQLException;
 import web.process.csvData.CSVFileData;
 import web.exceptions.GeneralApplicationException;
 
@@ -11,7 +13,7 @@ import web.exceptions.GeneralApplicationException;
  * @author SoundlyGifted
  */
 @Local
-public interface DatabaseHandlerLocal {
+public interface DBDataHandlerLocal {
     
     /**
      * Inserts multiple records to the database table from the input Data Object.
@@ -20,9 +22,11 @@ public interface DatabaseHandlerLocal {
      * inserted into the database table.
      * @return "true" if insert operation is successful, "false" otherwise.
      * @throws web.exceptions.GeneralApplicationException
+     * @throws java.io.IOException
+     * @throws java.sql.SQLException
      */
     public boolean insertMultRecs(CSVFileData csvFileData) 
-            throws GeneralApplicationException;
+            throws GeneralApplicationException, IOException, SQLException;
     
     
     /**
@@ -30,6 +34,9 @@ public interface DatabaseHandlerLocal {
      * 
      * @return Data Object containing data records from the database table.
      * @throws web.exceptions.GeneralApplicationException
+     * @throws java.io.IOException
+     * @throws java.sql.SQLException
      */
-    public CSVFileData selectAll() throws GeneralApplicationException;
+    public CSVFileData selectAll() 
+            throws GeneralApplicationException, IOException, SQLException;
 }

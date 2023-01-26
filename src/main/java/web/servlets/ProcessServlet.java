@@ -11,11 +11,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import java.io.File;
+import java.sql.SQLException;
 import web.exceptions.GeneralApplicationException;
 import web.process.csvData.CSVFileData;
-import web.process.database.DatabaseHandlerLocal;
 import web.process.download.AppCSVWriterLocal;
 import web.process.parse.AppCSVParserLocal;
+import web.process.database.DBDataHandlerLocal;
 
 /**
  *
@@ -26,7 +27,7 @@ import web.process.parse.AppCSVParserLocal;
 public class ProcessServlet extends HttpServlet {
 
     @EJB
-    private DatabaseHandlerLocal databaseHandler;
+    private DBDataHandlerLocal databaseHandler;
 
     @EJB
     private AppCSVParserLocal appCSVParser;    
@@ -76,7 +77,7 @@ public class ProcessServlet extends HttpServlet {
                 if (uploadCSVDataToDB(csvFileData)) {
                     uploadSuccessful = 1;
                 }
-            } catch (GeneralApplicationException e) {
+            } catch (GeneralApplicationException|SQLException e) {
                 session.setAttribute("GeneralApplicationException", e.getMessage());
             }
         }
@@ -99,7 +100,7 @@ public class ProcessServlet extends HttpServlet {
                         selectedMethod)) {
                     downloadSuccessful = 1;
                 }
-            } catch (GeneralApplicationException e) {
+            } catch (GeneralApplicationException|SQLException e) {
                 session.setAttribute("GeneralApplicationException", e.getMessage());
             }
         }
@@ -154,7 +155,7 @@ public class ProcessServlet extends HttpServlet {
     
 
     private boolean uploadCSVDataToDB(CSVFileData csvFileData) 
-            throws GeneralApplicationException {
+            throws GeneralApplicationException, IOException, SQLException {
         if (csvFileData.getRecordListWithCSVFileHeaders().isEmpty()) {
             return false;           
         }
