@@ -2,9 +2,9 @@ package web.process.csvData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * This class represents CSV File Data and used to keep data received from an
@@ -60,6 +60,7 @@ public class CSVFileData {
     private final CSVFileAllowedHeaderEnum[] headers 
             = CSVFileAllowedHeaderEnum.values();
 
+    
     /**
      * This constructor creates a CSVFileData object with the list of CSV File 
      * records as an empty ArrayList<>();
@@ -68,57 +69,6 @@ public class CSVFileData {
         this.recordListWithCSVFileHeaders = new ArrayList<>();
     }
 
-    /**
-     * This constructor creates a CSVFileData object based on the record list
-     * received as the input parameter.
-     * 
-     * @param recordList input record list.
-     */
-    public CSVFileData(List<Map<String, String>> recordList) {
-        if (recordList == null || recordList.isEmpty()) {
-            this.recordListWithCSVFileHeaders = new ArrayList<>();
-        } else {
-            Map<String, String> firstRecord = recordList.get(0);
-            ArrayList<String> actualHeaders = new ArrayList<>();
-            for (String actualHeader : firstRecord.keySet()) {
-                actualHeaders.add(actualHeader);
-            }
-            if (headers.equals(actualHeaders)) {
-                this.recordListWithCSVFileHeaders = recordList;
-            } else {
-                this.recordListWithCSVFileHeaders = new ArrayList<>();
-            }
-        }
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 19 * hash + Objects.hashCode(this.recordListWithCSVFileHeaders);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final CSVFileData other = (CSVFileData) obj;
-        return Objects.equals(this.recordListWithCSVFileHeaders, other
-                .recordListWithCSVFileHeaders);
-    }
-
-    @Override
-    public String toString() {
-        return "csvFileData{" + "recordList=" 
-                + recordListWithCSVFileHeaders + '}';
-    }
 
     /**
      * Used to get the List of CSV File records as a mapping of values to the 
@@ -131,19 +81,21 @@ public class CSVFileData {
         return recordListWithCSVFileHeaders;
     }
 
+    
     /**
-     * Used to get the allowed CSV File Headers (most frequently for the purpose 
-     * of validation of the headers in the uploaded CSV File).
+     * Used to get the allowed CSV File Headers (most for validation of the 
+     * headers in the uploaded CSV File).
      * 
      * @return allowed CSV File Headers.
      */
     public ArrayList<String> getAllowedCSVFileHeaders() {
-        ArrayList<String> headerList = new ArrayList<>();
+        List<String> headerList = new LinkedList<>();
         for (CSVFileAllowedHeaderEnum header : headers) {
             headerList.add(header.getHeaderCSVFileName());
         }
-        return headerList;
+        return new ArrayList<>(headerList);
     }
+    
     
     /**
      * Used to get database field labels mapped to the CSV File header names.
@@ -159,6 +111,7 @@ public class CSVFileData {
         return map;
     }
     
+    
     /**
      * Used to get database field types mapped to the CSV File header names.
      * 
@@ -172,6 +125,7 @@ public class CSVFileData {
         }
         return map;
     }
+    
     
     /**
      * Adds a record representing a CSV File data record to the record list 
