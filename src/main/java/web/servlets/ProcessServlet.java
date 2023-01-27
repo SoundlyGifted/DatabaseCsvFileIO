@@ -13,7 +13,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import java.io.File;
 import java.sql.SQLException;
-import web.exceptions.GeneralApplicationException;
+import web.process.parse.exceptions.FileValidationException;
 import web.process.csvData.CSVFileData;
 import web.process.download.AppCSVWriterLocal;
 import web.process.parse.AppCSVParserLocal;
@@ -36,7 +36,7 @@ public class ProcessServlet extends HttpServlet {
     
     @EJB
     private AppCSVWriterLocal appCSVWriter;
-    
+        
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -82,7 +82,7 @@ public class ProcessServlet extends HttpServlet {
                         = parseCSVFile(filePart, selectedMethod);
                 // Uploading the parsed data into the database.
                 uploadCSVDataToDB(csvFileData);
-            } catch (GeneralApplicationException
+            } catch (FileValidationException
                     | SQLException
                     | IOException
                     | NumberFormatException
@@ -136,43 +136,27 @@ public class ProcessServlet extends HttpServlet {
 
     
     private CSVFileData parseCSVFile (Part filePart, String parsingMethodSelected) 
-            throws GeneralApplicationException, IOException, CsvValidationException {
+            throws IOException, CsvValidationException, FileValidationException {
         /* Collection to keep records from csv-file.
          * Each record is a Map with a csv table values mapped to 
          * the csv table headers (Map<String, String>).
          */
-        CSVFileData csvFileData;
-
-        if (filePart != null) {
-            String fileName = filePart.getSubmittedFileName();
-            if (!fileName.trim().isEmpty()) {
-                if (fileName.endsWith(".csv")) {
-                    switch (parsingMethodSelected) {
-                        case "CommonsCSV":
-                            csvFileData = appCSVParser
-                                    .parseWithCommonsCSV(filePart);
-                            break;
-                        case "OpenCSV":
-                            csvFileData = appCSVParser
-                                    .parseWithOpenCSV(filePart);
-                            break;
-                        default:
-                            csvFileData = new CSVFileData();
-                            break;
-                    }
-                    return csvFileData;
-                } else {
-                    throw new GeneralApplicationException("The selected "
-                                    + "file is not a CSV file.");
-                }
-            } else {
-                throw new GeneralApplicationException("No file selected.");
-            }
+        CSVFileData csvFileData = null;
+        switch (parsingMethodSelected) {
+            case "CommonsCSV":
+                csvFileData = appCSVParser.parseWithCommonsCSV(filePart);
+                break;
+            case "OpenCSV":
+                csvFileData = appCSVParser.parseWithOpenCSV(filePart);
+                break;
         }
-        return new CSVFileData();
+        if (csvFileData == null) {
+            csvFileData = new CSVFileData();
+        }
+        return csvFileData;
     }
     
-
+    
     private void uploadCSVDataToDB(CSVFileData csvFileData) 
             throws IOException, SQLException, NumberFormatException {
         databaseHandler.insertMultRecs(csvFileData);
@@ -184,8 +168,10 @@ public class ProcessServlet extends HttpServlet {
         switch (downloadMethodSelected) {
             case "CommonsCSV":
                 appCSVWriter.writeWithCommonsCSV(csvFileData, outputFile);
+                break;
             case "OpenCSV":
                 appCSVWriter.writeWithOpenCSV(csvFileData, outputFile);
+                break;
         }
     }
     

@@ -14,6 +14,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
 import web.process.csvData.CSVFileData;
+import web.process.parse.exceptions.FileValidationException;
 
 /**
  * This Bean contains implementation of methods that are used to parse a 
@@ -28,7 +29,9 @@ public class AppCSVParser implements AppCSVParserLocal {
      * {@inheritDoc}
      */
     @Override
-    public CSVFileData parseWithCommonsCSV(Part filePart) throws IOException {
+    public CSVFileData parseWithCommonsCSV(Part filePart) 
+            throws FileValidationException, IOException {
+        validateFile(filePart);
         /* Collection to keep records from csv-file.
          * Each record is a Map with a csv table values mapped to 
          * the csv table headers (Map<String, String>).
@@ -96,7 +99,8 @@ public class AppCSVParser implements AppCSVParserLocal {
      */
     @Override
     public CSVFileData parseWithOpenCSV(Part filePart) 
-            throws IOException, CsvValidationException {
+            throws FileValidationException, IOException, CsvValidationException {
+        validateFile(filePart);
         /* Collection to keep records from csv-file.
          * Each record is a Map with a csv table values mapped to 
          * the csv table headers (Map<String, String>).
@@ -148,5 +152,17 @@ public class AppCSVParser implements AppCSVParserLocal {
                     + ioex.getMessage());
         }
         return csvFileData;
+    }
+    
+    
+    private void validateFile(Part filePart) throws FileValidationException {
+        String filePartContentType = null;
+        if (filePart != null) {
+            filePartContentType = filePart.getContentType();
+        }
+        if (filePart == null || filePartContentType == null 
+                || !filePart.getContentType().equals("text/csv")) {
+            throw new FileValidationException("No proper csv-file selected");
+        }
     }
 }
