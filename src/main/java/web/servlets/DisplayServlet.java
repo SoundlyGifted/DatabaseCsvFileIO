@@ -42,7 +42,7 @@ public class DisplayServlet extends HttpServlet {
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if forward to the JSP page failed.
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -103,7 +103,8 @@ public class DisplayServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
+        return "Sevlet to display the page with the result after the operation "
+                + "was performed by another servlet.";
     }// </editor-fold>
 
 }

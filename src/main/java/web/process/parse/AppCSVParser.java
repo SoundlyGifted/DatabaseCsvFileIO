@@ -13,7 +13,6 @@ import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
-import web.exceptions.GeneralApplicationException;
 import web.process.csvData.CSVFileData;
 
 /**
@@ -36,6 +35,7 @@ public class AppCSVParser implements AppCSVParserLocal {
          */
         CSVFileData csvFileData = new CSVFileData();
 
+        String charSet = "UTF-8";
         /* Using BOMInputStream class from Apache Commons IO library to deal 
          * with Byte Order Marks (BOM).
          * BOMInputStream is a wrapper class for InputStream. 
@@ -44,7 +44,7 @@ public class AppCSVParser implements AppCSVParserLocal {
                 .getInputStream())) {
             if (inputStream != null) {
                 try (InputStreamReader inputStreamReader
-                        = new InputStreamReader(inputStream, "UTF-8")) {
+                        = new InputStreamReader(inputStream, charSet)) {
                     
                     // Parsing CSV file using Apache Commons CSV library.
                     
@@ -78,8 +78,15 @@ public class AppCSVParser implements AppCSVParserLocal {
                             }
                         }
                     }
+                } catch (IOException ioex) {
+                    throw new IOException("[AppCSVParser] Selected file can "
+                            + "not be read or the charset '" + charSet + "' is "
+                                    + "not supported. " + ioex.getMessage());                    
                 }
             }
+        } catch (IOException ioex) {
+            throw new IOException("[AppCSVParser] Selected file can not be "
+                    + "read. " + ioex.getMessage());            
         }
         return csvFileData;
     }
@@ -89,15 +96,16 @@ public class AppCSVParser implements AppCSVParserLocal {
      */
     @Override
     public CSVFileData parseWithOpenCSV(Part filePart) 
-            throws IOException, GeneralApplicationException {
+            throws IOException, CsvValidationException {
         /* Collection to keep records from csv-file.
          * Each record is a Map with a csv table values mapped to 
          * the csv table headers (Map<String, String>).
          */
         CSVFileData csvFileData = new CSVFileData();
 
+        String charSet = "UTF-8";
         try (InputStreamReader inputStreamReader
-                = new InputStreamReader(filePart.getInputStream(), "UTF-8")) {
+                = new InputStreamReader(filePart.getInputStream(), charSet)) {
 
             com.opencsv.ICSVParser parser
                     = new CSVParserBuilder().withSeparator(';')
@@ -128,17 +136,16 @@ public class AppCSVParser implements AppCSVParserLocal {
                             csvFileData.addRecord(rec);
                         }
                     }
-                } catch (CsvValidationException ex) {
-                    System.out.println("*** [FileUploadServlet"
-                            + ".parseWithOpenCSV] + csv file contains rows "
-                            + "with invalid values. ***");
-                    GeneralApplicationException exception
-                            = new GeneralApplicationException("csv file "
-                                    + "contains invalid values ... "
-                                    + ex.getMessage());
-                    throw exception;
+                } catch (CsvValidationException csvvex) {
+                    throw new CsvValidationException("[AppCSVParser] csv file "
+                                    + "contains invalid values. "
+                                    + csvvex.getMessage());
                 }
             }
+        } catch (IOException ioex) {
+            throw new IOException("[AppCSVParser] Selected file can not be read "
+                    + "or the charset '" + charSet + "' is not supported. " 
+                    + ioex.getMessage());
         }
         return csvFileData;
     }

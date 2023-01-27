@@ -19,11 +19,9 @@ public interface AppCSVWriterLocal {
      * 
      * @param csvFileData csv data to be written to the file.
      * @param outputFile the output file.
-     * @return true in case if the writing operation was successful, false 
-     * otherwise.
-     * @throws IOException 
+     * @throws IOException if file writing error occured.
      */
-    public boolean writeWithCommonsCSV(CSVFileData csvFileData, File outputFile) 
+    public void writeWithCommonsCSV(CSVFileData csvFileData, File outputFile) 
             throws IOException;
     
     /**
@@ -31,10 +29,8 @@ public interface AppCSVWriterLocal {
      * 
      * @param csvFileData csv data to be written to the file.
      * @param outputFile the output file.
-     * @return true in case if the writing operation was successful, false 
-     * otherwise.
-     * @throws IOException 
+     * @throws IOException if file writing error occured.
      */
-    public boolean writeWithOpenCSV(CSVFileData csvFileData, File outputFile) 
+    public void writeWithOpenCSV(CSVFileData csvFileData, File outputFile) 
             throws IOException;
 }

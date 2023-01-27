@@ -4,7 +4,6 @@ import jakarta.ejb.Local;
 import java.io.IOException;
 import java.sql.SQLException;
 import web.process.csvData.CSVFileData;
-import web.exceptions.GeneralApplicationException;
 
 /**
  * This Interface contains method declarations that are used to handle 
@@ -20,31 +19,35 @@ public interface DBDataHandlerLocal {
      * 
      * @param csvFileData input CSVFileData object containing records to be 
      * inserted into the database table.
-     * @return "true" if insert operation is successful, "false" otherwise.
-     * @throws web.exceptions.GeneralApplicationException
-     * @throws java.io.IOException
-     * @throws java.sql.SQLException
+     * @throws java.io.IOException if the file containing SQL query can not be
+     * found in the resource folder or can not be read.
+     * @throws java.sql.SQLException if the connection to the database can not
+     * be established or the SQL query can not be executed.
+     * @throws java.lang.NumberFormatException if the csv data contains a value
+     * that can not be converted to the proper database field type.
      */
-    public boolean insertMultRecs(CSVFileData csvFileData) 
-            throws GeneralApplicationException, IOException, SQLException;
+    public void insertMultRecs(CSVFileData csvFileData) 
+            throws IOException, SQLException, NumberFormatException;
     
     
     /**
      * Selects all records from the database table into the Data Object.
      * 
      * @return Data Object containing data records from the database table.
-     * @throws web.exceptions.GeneralApplicationException
-     * @throws java.io.IOException
-     * @throws java.sql.SQLException
+     * @throws java.io.IOException if the file containing SQL query can not be
+     * found in the resource folder or can not be read.
+     * @throws java.sql.SQLException if the connection to the database can not
+     * be established or the SQL query can not be executed.
      */
-    public CSVFileData selectAll() 
-            throws GeneralApplicationException, IOException, SQLException;
+    public CSVFileData selectAll() throws IOException, SQLException;
     
     /**
      * Deletes all records from the database table.
-     * 
-     * @throws web.exceptions.GeneralApplicationException 
-     * @throws java.io.IOException 
+     *  
+     * @throws java.io.IOException if the file containing SQL query can not be
+     * found in the resource folder or can not be read.
+     * @throws java.sql.SQLException if the connection to the database can not
+     * be established or the SQL query can not be executed.
      */
-    public void deleteAll() throws GeneralApplicationException, IOException;
+    public void deleteAll() throws IOException, SQLException;
 }

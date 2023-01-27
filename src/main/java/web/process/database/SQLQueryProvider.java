@@ -37,7 +37,7 @@ public class SQLQueryProvider implements SQLQueryProviderLocal {
                 }
             }
         } catch (IOException ioex) {
-            throw new IOException("*** [SQLQueryProvider] could not read the '"
+            throw new IOException("[SQLQueryProvider] could not read the '"
                     + path + "' query: " + ioex.getMessage());
         }
     }

@@ -25,62 +25,72 @@ public class AppCSVWriter implements AppCSVWriterLocal {
      * {@inheritDoc}
      */
     @Override
-    public boolean writeWithCommonsCSV(CSVFileData csvFileData, File outputFile)
+    public void writeWithCommonsCSV(CSVFileData csvFileData, File outputFile) 
             throws IOException {
-        ArrayList<String> csvFileHeaders = csvFileData
-                .getAllowedCSVFileHeaders();
-        List<Map<String, String>> recordList = csvFileData
-                .getRecordListWithCSVFileHeaders();
+        try {
+            FileWriter fileWriter = new FileWriter(outputFile);
 
-        FileWriter fileWriter = new FileWriter(outputFile);
+            ArrayList<String> csvFileHeaders = csvFileData
+                    .getAllowedCSVFileHeaders();
+            List<Map<String, String>> recordList = csvFileData
+                    .getRecordListWithCSVFileHeaders();
 
-        CSVFormat csvFormat = CSVFormat.EXCEL;
-        CSVFormat.Builder csvFormatBuilder = csvFormat.builder();
-        csvFormatBuilder.setDelimiter(';');
-        csvFormatBuilder.setHeader(csvFileHeaders.get(0),
-                csvFileHeaders.get(1));
+            CSVFormat csvFormat = CSVFormat.EXCEL;
+            CSVFormat.Builder csvFormatBuilder = csvFormat.builder();
+            csvFormatBuilder.setDelimiter(';');
+            csvFormatBuilder.setHeader(csvFileHeaders.get(0),
+                    csvFileHeaders.get(1));
 
-        try (CSVPrinter printer
-                = new CSVPrinter(fileWriter, csvFormatBuilder.build())) {
-            for (Map<String, String> record : recordList) {
-                printer.printRecord(record.get(csvFileHeaders.get(0)),
-                        record.get(csvFileHeaders.get(1)));
+            try (CSVPrinter printer 
+                    = new CSVPrinter(fileWriter, csvFormatBuilder.build())) {
+                for (Map<String, String> record : recordList) {
+                    printer.printRecord(record.get(csvFileHeaders.get(0)),
+                            record.get(csvFileHeaders.get(1)));
+                }
+                printer.flush();
             }
-            printer.flush();
+        } catch (IOException ioex) {
+            throw new IOException("[AppCSVWriter] File writing error for the "
+                    + "file '" + outputFile.getAbsolutePath() + "'. " 
+                    + ioex.getMessage());
         }
-        return true;
     }
     
     /**
      * {@inheritDoc}
      */    
     @Override
-    public boolean writeWithOpenCSV(CSVFileData csvFileData, File outputFile)
+    public void writeWithOpenCSV(CSVFileData csvFileData, File outputFile) 
             throws IOException {
-        ArrayList<String> csvFileHeaders = csvFileData
-                .getAllowedCSVFileHeaders();
-        List<Map<String, String>> recordList = csvFileData
-                .getRecordListWithCSVFileHeaders();
+        try {
+            FileWriter fileWriter = new FileWriter(outputFile);
 
-        FileWriter fileWriter = new FileWriter(outputFile);
+            ArrayList<String> csvFileHeaders = csvFileData
+                    .getAllowedCSVFileHeaders();
+            List<Map<String, String>> recordList = csvFileData
+                    .getRecordListWithCSVFileHeaders();
 
-        try (CSVWriter writer = new CSVWriter(fileWriter, ';',
-                CSVWriter.NO_QUOTE_CHARACTER,
-                CSVWriter.DEFAULT_ESCAPE_CHARACTER,
-                CSVWriter.DEFAULT_LINE_END)) {
-            // writing headers first.
-            String[] headers = {csvFileHeaders.get(0),
-                csvFileHeaders.get(1)};
-            writer.writeNext(headers);
+            try (CSVWriter writer = new CSVWriter(fileWriter, ';',
+                    CSVWriter.NO_QUOTE_CHARACTER,
+                    CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+                    CSVWriter.DEFAULT_LINE_END)) {
+                // writing headers first.
+                String[] headers = {csvFileHeaders.get(0),
+                    csvFileHeaders.get(1)};
+                writer.writeNext(headers);
 
-            // then writing values of each record one by one.
-            for (Map<String, String> record : recordList) {
-                String[] values = {record.get(csvFileHeaders.get(0)),
-                    record.get(csvFileHeaders.get(1))};
-                writer.writeNext(values);
+                // then writing values of each record one by one.
+                for (Map<String, String> record : recordList) {
+                    String[] values = {record.get(csvFileHeaders.get(0)),
+                        record.get(csvFileHeaders.get(1))};
+                    writer.writeNext(values);
+                }
+                writer.flush();
             }
-            writer.flush();
+        } catch (IOException ioex) {
+            throw new IOException("[AppCSVWriter] File writing error for the "
+                    + "file '" + outputFile.getAbsolutePath() + "'. " 
+                    + ioex.getMessage());            
         }
-        return true;
     }
 }

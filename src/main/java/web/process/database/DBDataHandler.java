@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import web.process.csvData.CSVFileData;
-import web.exceptions.GeneralApplicationException;
 
 /**
  * This Bean contains implementation of methods that are used to handle 
@@ -34,10 +33,16 @@ public class DBDataHandler implements DBDataHandlerLocal {
      * {@inheritDoc}
      */
     @Override
-    public boolean insertMultRecs(CSVFileData csvFileData) 
-            throws GeneralApplicationException, IOException, SQLException {
-        
-        String sql = sqlQueryProvider.getQuery("insert.mydata");
+    public void insertMultRecs(CSVFileData csvFileData) 
+            throws IOException, SQLException, NumberFormatException {
+        String sqlFileName = "insert.mydata";
+        String sql;
+        try {
+            sql = sqlQueryProvider.getQuery(sqlFileName);
+        } catch (IOException ioex) {
+            throw new IOException("[DBDataHandler] Could not read SQL query "
+                    + "from '" + sqlFileName + ".sql' file. " + ioex.getMessage());
+        }
 
         try (Connection connection = connectionHandler.getDBConnection();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -91,23 +96,27 @@ public class DBDataHandler implements DBDataHandlerLocal {
             }
             statement.executeBatch();
         } catch (SQLException sqlex) {
-            GeneralApplicationException exception 
-                    = new GeneralApplicationException("Error executing prepared "
-                            + "statement: " + sqlex.getMessage(), sqlex);
-            throw exception;
+            throw new SQLException("[DBDataHandler] Error connecting to the "
+                    + "database or executing SQL query: " 
+                    + sqlex.getMessage());
         }
-        return true;
     }
     
     /**
      * {@inheritDoc}
      */
     @Override
-    public CSVFileData selectAll() 
-            throws GeneralApplicationException, IOException, SQLException {
-        
+    public CSVFileData selectAll() throws IOException, SQLException {
         CSVFileData csvFileData = new CSVFileData();
-        String sql = sqlQueryProvider.getQuery("select.all.mydata");
+
+        String sqlFileName = "select.all.mydata";
+        String sql;
+        try {
+            sql = sqlQueryProvider.getQuery(sqlFileName);
+        } catch (IOException ioex) {
+            throw new IOException("[DBDataHandler] Could not read SQL query "
+                    + "from '" + sqlFileName + ".sql' file. " + ioex.getMessage());
+        }
 
         try (Connection connection = connectionHandler.getDBConnection();
                 Statement statement = connection.createStatement()) {
@@ -140,11 +149,10 @@ public class DBDataHandler implements DBDataHandlerLocal {
                     csvFileData.addRecord(record);
                 }
             }
-        } catch (SQLException ex) {
-            GeneralApplicationException exception
-                    = new GeneralApplicationException(" Error executing "
-                            + "prepared statement: " + ex.getMessage(), ex);
-            throw exception;
+        } catch (SQLException sqlex) {
+            throw new SQLException("[DBDataHandler] Error connecting to the "
+                    + "database or executing SQL query: " 
+                    + sqlex.getMessage());
         }
         return csvFileData;
     }
@@ -153,23 +161,29 @@ public class DBDataHandler implements DBDataHandlerLocal {
      * {@inheritDoc}
      */
     @Override
-    public void deleteAll() 
-            throws GeneralApplicationException, IOException {
-        String sql = sqlQueryProvider.getQuery("delete.all.mydata");
+    public void deleteAll() throws IOException, SQLException {
+        String sqlFileName = "delete.all.mydata";
+        String sql;
+        try {
+            sql = sqlQueryProvider.getQuery(sqlFileName);
+        } catch (IOException ioex) {
+            throw new IOException("[DBDataHandler] Could not read SQL query "
+                    + "from '" + sqlFileName + ".sql' file. " + ioex.getMessage());
+        }
+        
         try (Connection connection = connectionHandler.getDBConnection();
                 Statement statement = connection.createStatement()) {
             statement.execute(sql);
         } catch (SQLException sqlex) {
-            GeneralApplicationException exception 
-                    = new GeneralApplicationException("Error executing "
-                            + "statement: " + sqlex.getMessage(), sqlex);
-            throw exception;
+            throw new SQLException("[DBDataHandler] Error connecting to the "
+                    + "database or executing SQL query: " 
+                    + sqlex.getMessage());
         }
     }
     
 
     private Double stringToDouble(String stringVal) 
-            throws GeneralApplicationException {
+            throws NumberFormatException {
         if (stringVal == null || stringVal.trim().isEmpty()) {
             return (double) 0;
         }
@@ -177,12 +191,10 @@ public class DBDataHandler implements DBDataHandlerLocal {
         try {
             Double doubleValue = Double.valueOf(stringVal);
             return doubleValue;
-        } catch (NumberFormatException ex) {
-            GeneralApplicationException exception
-                    = new GeneralApplicationException("Value '" 
+        } catch (NumberFormatException nfex) {
+            throw new NumberFormatException("[DBDataHandler] Value '" 
                             + stringVal + "' cannot be converted to Double. "
-                            + ex.getMessage(), ex);
-            throw exception;
+                            + nfex.getMessage());
         }
     }
 }

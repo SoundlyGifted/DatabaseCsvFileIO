@@ -1,5 +1,6 @@
 package web.servlets;
 
+import com.opencsv.exceptions.CsvValidationException;
 import jakarta.ejb.EJB;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -19,7 +20,8 @@ import web.process.parse.AppCSVParserLocal;
 import web.process.database.DBDataHandlerLocal;
 
 /**
- *
+ * Sevlet to process the submitted input data from the JSP page.
+ * 
  * @author SoundlyGifted
  */
 @WebServlet(name = "ProcessServlet", urlPatterns = {"/process.do"})
@@ -42,9 +44,12 @@ public class ProcessServlet extends HttpServlet {
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
+     * @throws java.io.UnsupportedEncodingException if the character encoding is 
+     * not supported.
+     * @throws java.io.IOException if redirect to display servlet failed.
      */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+    protected void processRequest(HttpServletRequest request, 
+            HttpServletResponse response)
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         
@@ -71,25 +76,30 @@ public class ProcessServlet extends HttpServlet {
              * POST request. 
              */
             Part filePart = request.getPart("file");
-
             try {
                 // Parsing csv-file using the selected method.
-                CSVFileData csvFileData = parseCSVFile(filePart, selectedMethod);
+                CSVFileData csvFileData
+                        = parseCSVFile(filePart, selectedMethod);
                 // Uploading the parsed data into the database.
-                if (uploadCSVDataToDB(csvFileData)) {
-                    uploadSuccessful = 1;
-                }
-            } catch (GeneralApplicationException|SQLException e) {
+                uploadCSVDataToDB(csvFileData);
+            } catch (GeneralApplicationException
+                    | SQLException
+                    | IOException
+                    | NumberFormatException
+                    |CsvValidationException e) {
                 session = request.getSession();
-                session.setAttribute("GeneralApplicationException", e.getMessage());
+                session.setAttribute("GeneralApplicationException",
+                        e.getMessage());
             }
+            uploadSuccessful = 1;
         }
         
         if (clickedDownload != null) {
             
             String downloadFileName = "myDataDownload";
             String home = System.getProperty("user.home");
-            File outputFile = new File(home + "/Downloads/" + downloadFileName + ".csv");
+            File outputFile = new File(home + "/Downloads/" + downloadFileName 
+                    + ".csv");
 
             try {
                 // Getting the records from the database.
@@ -97,20 +107,18 @@ public class ProcessServlet extends HttpServlet {
                 /* Downloading the data into the csv-file using the selected 
                  * download method.
                  */
-                if (downloadFileFromDB(csvFileData, outputFile,
-                        selectedMethod)) {
-                    downloadSuccessful = 1;
-                }
-            } catch (GeneralApplicationException|SQLException e) {
+                downloadFileFromDB(csvFileData, outputFile, selectedMethod);
+            } catch (IOException|SQLException e) {
                 session = request.getSession();
                 session.setAttribute("GeneralApplicationException", e.getMessage());
             }
+            downloadSuccessful = 1;
         }
         
         if (clickedClear != null) {
             try {
                 databaseHandler.deleteAll();
-            } catch (GeneralApplicationException e) {
+            } catch (IOException|SQLException e) {
                 session = request.getSession();
                 session.setAttribute("GeneralApplicationException", e.getMessage());
             }
@@ -128,7 +136,7 @@ public class ProcessServlet extends HttpServlet {
 
     
     private CSVFileData parseCSVFile (Part filePart, String parsingMethodSelected) 
-            throws GeneralApplicationException, IOException {
+            throws GeneralApplicationException, IOException, CsvValidationException {
         /* Collection to keep records from csv-file.
          * Each record is a Map with a csv table values mapped to 
          * the csv table headers (Map<String, String>).
@@ -165,28 +173,21 @@ public class ProcessServlet extends HttpServlet {
     }
     
 
-    private boolean uploadCSVDataToDB(CSVFileData csvFileData) 
-            throws GeneralApplicationException, IOException, SQLException {
-        if (csvFileData.getRecordListWithCSVFileHeaders().isEmpty()) {
-            return false;           
-        }
-        return databaseHandler.insertMultRecs(csvFileData);
+    private void uploadCSVDataToDB(CSVFileData csvFileData) 
+            throws IOException, SQLException, NumberFormatException {
+        databaseHandler.insertMultRecs(csvFileData);
     }
     
     
-    private boolean downloadFileFromDB(CSVFileData csvFileData, File outputFile, 
+    private void downloadFileFromDB(CSVFileData csvFileData, File outputFile, 
             String downloadMethodSelected) throws IOException {
         switch (downloadMethodSelected) {
             case "CommonsCSV":
-                return appCSVWriter
-                        .writeWithCommonsCSV(csvFileData, outputFile);
+                appCSVWriter.writeWithCommonsCSV(csvFileData, outputFile);
             case "OpenCSV":
-                return appCSVWriter
-                        .writeWithOpenCSV(csvFileData, outputFile);
-            default:
-                return false;
+                appCSVWriter.writeWithOpenCSV(csvFileData, outputFile);
         }
-    }    
+    }
     
     
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -226,7 +227,7 @@ public class ProcessServlet extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
+        return "Sevlet to process the submitted input data from the JSP page.";
     }// </editor-fold>
 
 }

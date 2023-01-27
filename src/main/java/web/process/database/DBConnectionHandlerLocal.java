@@ -16,7 +16,8 @@ public interface DBConnectionHandlerLocal {
      * Returns database Connection
      * 
      * @return database Connection
-     * @throws java.sql.SQLException
+     * @throws java.sql.SQLException if the connection to the database can not
+     * be established.
      */
     public Connection getDBConnection() throws SQLException;
     
@@ -24,7 +25,8 @@ public interface DBConnectionHandlerLocal {
      * Closes database Connection.
      * 
      * @param connection database Connection
-     * @throws java.sql.SQLException
+     * @throws java.sql.SQLException if some error occured while closing the 
+     * database connection.
      */
     public void closeDBConnection(Connection connection) throws SQLException;
 }
