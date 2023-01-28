@@ -137,28 +137,24 @@ public class ProcessServlet extends HttpServlet {
     
     private CSVFileData parseCSVFile (Part filePart, String parsingMethodSelected) 
             throws IOException, CsvValidationException, FileValidationException {
-        /* Collection to keep records from csv-file.
+        /* CSVFileData is a Collection to keep records from csv-file.
          * Each record is a Map with a csv table values mapped to 
          * the csv table headers (Map<String, String>).
          */
-        CSVFileData csvFileData = null;
         switch (parsingMethodSelected) {
             case "CommonsCSV":
-                csvFileData = appCSVParser.parseWithCommonsCSV(filePart);
-                break;
+                return appCSVParser.parseWithCommonsCSV(filePart);
             case "OpenCSV":
-                csvFileData = appCSVParser.parseWithOpenCSV(filePart);
-                break;
+                return appCSVParser.parseWithOpenCSV(filePart);
+            default:
+                throw new FileValidationException("Provided parsing method "
+                        + "is not supported.");
         }
-        if (csvFileData == null) {
-            csvFileData = new CSVFileData();
-        }
-        return csvFileData;
     }
     
     
     private void uploadCSVDataToDB(CSVFileData csvFileData) 
-            throws IOException, SQLException, NumberFormatException {
+            throws IOException, SQLException, NumberFormatException {      
         databaseHandler.insertMultRecs(csvFileData);
     }
     

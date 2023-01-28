@@ -9,6 +9,8 @@ import jakarta.servlet.http.Part;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -61,21 +63,27 @@ public class AppCSVParser implements AppCSVParserLocal {
                                     .CSVParser(inputStreamReader, 
                                             csvFormatBuilder.build())) {
                         Map<String, String> rec;
+                        /* Checking that:
+                         * 1) csv-file is not empty.
+                         * 2) actual csv-file headers are the allowed headers.
+                         */
+                        List<String> allowedHeaders 
+                                = csvFileData.getAllowedCSVFileHeaders();
+                        List<String> actualHeaders 
+                                = new ArrayList<>(csvParser.getHeaderNames());
+                        if (actualHeaders.isEmpty() 
+                                || (actualHeaders.stream().allMatch(x -> x.isEmpty()))) {
+                            throw new FileValidationException("[AppCSVParser] "
+                                    + "Provided csv-file is empty.");
+                        }
+                        if (!actualHeaders.equals(allowedHeaders)) {
+                            throw new FileValidationException("[AppCSVParser] "
+                                    + "Selected file has invalid "
+                                    + "headers.");
+                        }
+                        // Writing CSV data into the CSVFileData object.
                         for (CSVRecord record : csvParser) {
                             rec = record.toMap();
-                            // Checking CSVFile headers on the first record only.
-                            if (record.getRecordNumber() == 1) {
-                                ArrayList<String> allowedHeaders
-                                        = csvFileData.getAllowedCSVFileHeaders();
-                                ArrayList<String> actualHeaders 
-                                        = new ArrayList<>();
-                                for (String actualHeader : rec.keySet()) {
-                                    actualHeaders.add(actualHeader);
-                                }
-                                if (!actualHeaders.equals(allowedHeaders)) {
-                                    return csvFileData;
-                                }
-                            }
                             if (!rec.isEmpty()) {
                                 csvFileData.addRecord(rec);
                             }
@@ -112,39 +120,47 @@ public class AppCSVParser implements AppCSVParserLocal {
                 = new InputStreamReader(filePart.getInputStream(), charSet)) {
 
             com.opencsv.ICSVParser parser
-                    = new CSVParserBuilder().withSeparator(';')
-                            .build();
+                    = new CSVParserBuilder().withSeparator(';').build();
 
             CSVReaderHeaderAwareBuilder readerBuilder
                     = new CSVReaderHeaderAwareBuilder(inputStreamReader);
             readerBuilder.withCSVParser(parser);
 
             try (CSVReaderHeaderAware reader = readerBuilder.build()) {
-                try {
-                    Map<String, String> rec;
-                    while ((rec = reader.readMap()) != null) {
-                        // Checking CSVFile headers on the first record only.
-                        if (reader.getRecordsRead() == 1) {
-                            ArrayList<String> allowedHeaders
-                                    = csvFileData.getAllowedCSVFileHeaders();
-                            ArrayList<String> actualHeaders = new ArrayList<>();
-                            for (String actualHeader : rec.keySet()) {
-                                actualHeaders.add(actualHeader);
-
-                            }
-                            if (!actualHeaders.equals(allowedHeaders)) {
-                                return csvFileData;
-                            }
+                Map<String, String> rec;
+                while ((rec = reader.readMap()) != null) {
+                    /* Checking CSVFile headers on the second record only
+                     * (first record is the header record which is skipped).
+                     */
+                    if (reader.getRecordsRead() == 2) {
+                        /* Checking that actual csv-file headers are the 
+                         * allowed headers.
+                         */
+                        ArrayList<String> allowedHeaders
+                                = csvFileData.getAllowedCSVFileHeaders();
+                        List<String> actualHeaders = new LinkedList<>();
+                        for (String actualHeader : rec.keySet()) {
+                            actualHeaders.add(actualHeader);
                         }
-                        if (!rec.isEmpty()) {
-                            csvFileData.addRecord(rec);
+                        actualHeaders = new ArrayList<>(actualHeaders);
+                        if (!actualHeaders.equals(allowedHeaders)) {
+                            throw new FileValidationException("[AppCSVParser] "
+                                    + "Selected file has invalid "
+                                    + "headers.");
                         }
                     }
-                } catch (CsvValidationException csvvex) {
-                    throw new CsvValidationException("[AppCSVParser] csv file "
-                                    + "contains invalid values. "
-                                    + csvvex.getMessage());
+                    if (!rec.isEmpty()) {
+                        csvFileData.addRecord(rec);
+                    }
                 }
+                if (csvFileData.getRecordListWithCSVFileHeaders().isEmpty()) {
+                    throw new FileValidationException("[AppCSVParser] Provided "
+                            + "csv-file is empty or has no data except headers.");
+                }
+            } catch (CsvValidationException csvvex) {
+                throw new CsvValidationException("[AppCSVParser] csv file "
+                        + "contains invalid values. "
+                        + csvvex.getMessage());
             }
         } catch (IOException ioex) {
             throw new IOException("[AppCSVParser] Selected file can not be read "
@@ -162,7 +178,8 @@ public class AppCSVParser implements AppCSVParserLocal {
         }
         if (filePart == null || filePartContentType == null 
                 || !filePart.getContentType().equals("text/csv")) {
-            throw new FileValidationException("No proper csv-file selected");
+            throw new FileValidationException("[AppCSVParser] No proper csv-file "
+                    + "selected");
         }
     }
 }
