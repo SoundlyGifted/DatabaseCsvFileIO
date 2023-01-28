@@ -96,7 +96,7 @@ public class ProcessServlet extends HttpServlet {
         
         if (clickedDownload != null) {
             
-            String downloadFileName = "myDataDownload";
+            String downloadFileName = "content";
             String home = System.getProperty("user.home");
             File outputFile = new File(home + "/Downloads/" + downloadFileName 
                     + ".csv");
