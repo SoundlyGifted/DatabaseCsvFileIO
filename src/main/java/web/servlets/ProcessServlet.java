@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import java.sql.SQLException;
+import javax.naming.OperationNotSupportedException;
 import web.process.parse.exceptions.FileValidationException;
 import web.process.csvData.CSVFileData;
 import web.process.download.AppCSVWriterLocal;
@@ -80,11 +81,12 @@ public class ProcessServlet extends HttpServlet {
                         = parseCSVFile(filePart, selectedMethod);
                 // Uploading the parsed data into the database.
                 uploadCSVDataToDB(csvFileData);
-            } catch (FileValidationException
+            } catch (OperationNotSupportedException
+                    | FileValidationException
                     | SQLException
                     | IOException
                     | NumberFormatException
-                    |CsvValidationException e) {
+                    | CsvValidationException e) {
                 session = request.getSession();
                 session.setAttribute("GeneralApplicationException",
                         e.getMessage());
@@ -95,35 +97,41 @@ public class ProcessServlet extends HttpServlet {
         
         if (clickedDownload != null) {
             try {
-                // Getting the records from the database.
-                CSVFileData csvFileData = databaseHandler.selectAll();
+                if (!selectedMethod.isEmpty()) {
+                    // Getting the records from the database.
+                    CSVFileData csvFileData = databaseHandler.selectAll();
 
-                String downloadFileName = "content.csv";
-                // Force the server to download a csv-file.
-                /* Setting proper response header to inform the client that the
-                 * content is not meant to be displayed.
-                 * The "Content-Disposition" header is used for this purpose,
-                 * it can be interpreted by HTTP clients like web browsers.
-                 */
-                response.setContentType("application/octet-stream");
-                String headerName = "Content-Disposition";
-                /* Specifying the disposition type.
-                 * 1) inline -  The body part is intended to be displayed 
-                 * automatically when the message content is displayed.
-                 * 2) attachment -  The body part is separate from the main 
-                 * content of the message and should not be displayed 
-                 * automatically except when prompted by the user.
-                 */
-                String headerValue = String.format("inline; filename=\"%s\"", downloadFileName);
-                response.setHeader(headerName, headerValue);
-                /* Downloading the data into the csv-file using the selected 
-                 * download method.
-                 */
-                downloadFileFromDB(csvFileData, response, selectedMethod);
-                
-            } catch (FileValidationException|IOException|SQLException e) {
+                    String downloadFileName = "content.csv";
+                    // Force the server to download a csv-file.
+                    /* Setting proper response header to inform the client that 
+                     * the content is not meant to be displayed.
+                     * The "Content-Disposition" header is used for this purpose,
+                     * it can be interpreted by HTTP clients like web browsers.
+                     */
+                    response.setContentType("application/octet-stream");
+                    String headerName = "Content-Disposition";
+                    /* Specifying the disposition type.
+                     * 1) inline -  The body part is intended to be displayed 
+                     * automatically when the message content is displayed.
+                     * 2) attachment -  The body part is separate from the main 
+                     * content of the message and should not be displayed 
+                     * automatically except when prompted by the user.
+                     */
+                    String headerValue 
+                            = String.format("attachment; filename=\"%s\"", 
+                                    downloadFileName);
+                    response.setHeader(headerName, headerValue);
+                    /* Downloading the data into the csv-file using the selected 
+                     * download method.
+                     */
+                    downloadFileFromDB(csvFileData, response, selectedMethod);
+                } else {
+                    postRedirectGet(response, anyMethodSelected, uploadSuccessful);
+                }
+            } catch (OperationNotSupportedException|IOException|SQLException e) {
                 session = request.getSession();
                 session.setAttribute("GeneralApplicationException", e.getMessage());
+                postRedirectGet(response, anyMethodSelected, uploadSuccessful);
             }
         }
         
@@ -140,7 +148,8 @@ public class ProcessServlet extends HttpServlet {
 
     
     private CSVFileData parseCSVFile (Part filePart, String parsingMethodSelected) 
-            throws IOException, CsvValidationException, FileValidationException {
+            throws IOException, CsvValidationException, FileValidationException,
+            OperationNotSupportedException {
         /* CSVFileData is a Collection to keep records from csv-file.
          * Each record is a Map with a csv table values mapped to 
          * the csv table headers (Map<String, String>).
@@ -151,8 +160,8 @@ public class ProcessServlet extends HttpServlet {
             case "OpenCSV":
                 return appCSVParser.parseWithOpenCSV(filePart);
             default:
-                throw new FileValidationException("Provided parsing method "
-                        + "is not supported.");
+                throw new OperationNotSupportedException("Provided parsing "
+                        + "method is not supported.");
         }
     }
     
@@ -163,9 +172,9 @@ public class ProcessServlet extends HttpServlet {
     }
     
     
-    private void downloadFileFromDB(CSVFileData csvFileData, HttpServletResponse response, 
-            String downloadMethodSelected) 
-            throws IOException, FileValidationException {
+    private void downloadFileFromDB(CSVFileData csvFileData, 
+            HttpServletResponse response, String downloadMethodSelected) 
+            throws IOException, OperationNotSupportedException {
         switch (downloadMethodSelected) {
             case "CommonsCSV":
                 appCSVWriter.writeWithCommonsCSV(csvFileData, response);
@@ -174,8 +183,8 @@ public class ProcessServlet extends HttpServlet {
                 appCSVWriter.writeWithOpenCSV(csvFileData, response);
                 break;
             default:
-                throw new FileValidationException("Provided download method "
-                        + "is not supported.");
+                throw new OperationNotSupportedException("Provided download "
+                        + "method is not supported.");
         }
     }
     
