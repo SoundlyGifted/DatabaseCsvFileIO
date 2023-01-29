@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
-import java.io.File;
 import java.sql.SQLException;
 import web.process.parse.exceptions.FileValidationException;
 import web.process.csvData.CSVFileData;
@@ -60,8 +59,7 @@ public class ProcessServlet extends HttpServlet {
         String clickedClear = request.getParameter("clicked_Clear");
 
         int anyMethodSelected = 0;
-        int uploadSuccessful = 0;        
-        int downloadSuccessful = 0;
+        int uploadSuccessful = 0;
 
         if (!(selectedMethod == null || selectedMethod.isEmpty())) {
             anyMethodSelected = 1;
@@ -92,27 +90,41 @@ public class ProcessServlet extends HttpServlet {
                         e.getMessage());
             }
             uploadSuccessful = 1;
+            postRedirectGet(response, anyMethodSelected, uploadSuccessful);
         }
         
         if (clickedDownload != null) {
-            
-            String downloadFileName = "content";
-            String home = System.getProperty("user.home");
-            File outputFile = new File(home + "/Downloads/" + downloadFileName 
-                    + ".csv");
-
             try {
                 // Getting the records from the database.
                 CSVFileData csvFileData = databaseHandler.selectAll();
+
+                String downloadFileName = "content.csv";
+                // Force the server to download a csv-file.
+                /* Setting proper response header to inform the client that the
+                 * content is not meant to be displayed.
+                 * The "Content-Disposition" header is used for this purpose,
+                 * it can be interpreted by HTTP clients like web browsers.
+                 */
+                response.setContentType("application/octet-stream");
+                String headerName = "Content-Disposition";
+                /* Specifying the disposition type.
+                 * 1) inline -  The body part is intended to be displayed 
+                 * automatically when the message content is displayed.
+                 * 2) attachment -  The body part is separate from the main 
+                 * content of the message and should not be displayed 
+                 * automatically except when prompted by the user.
+                 */
+                String headerValue = String.format("inline; filename=\"%s\"", downloadFileName);
+                response.setHeader(headerName, headerValue);
                 /* Downloading the data into the csv-file using the selected 
                  * download method.
                  */
-                downloadFileFromDB(csvFileData, outputFile, selectedMethod);
-            } catch (IOException|SQLException e) {
+                downloadFileFromDB(csvFileData, response, selectedMethod);
+                
+            } catch (FileValidationException|IOException|SQLException e) {
                 session = request.getSession();
                 session.setAttribute("GeneralApplicationException", e.getMessage());
             }
-            downloadSuccessful = 1;
         }
         
         if (clickedClear != null) {
@@ -122,16 +134,8 @@ public class ProcessServlet extends HttpServlet {
                 session = request.getSession();
                 session.setAttribute("GeneralApplicationException", e.getMessage());
             }
+            postRedirectGet(response, anyMethodSelected, uploadSuccessful);
         }
-        /* Using PRG (Post-Redirect-Get) pattern.
-         * Instead of forwarding from doPost() method redirecting to the doGet()
-         * method of another servlet (display servlet).
-         * This is needed to avoid duplicate data submission when user
-         * refreshes the page.        
-         */
-        response.sendRedirect("display.do?sa=" + anyMethodSelected 
-                + "&su=" + uploadSuccessful 
-                + "&sd=" + downloadSuccessful);
     }
 
     
@@ -159,16 +163,32 @@ public class ProcessServlet extends HttpServlet {
     }
     
     
-    private void downloadFileFromDB(CSVFileData csvFileData, File outputFile, 
-            String downloadMethodSelected) throws IOException {
+    private void downloadFileFromDB(CSVFileData csvFileData, HttpServletResponse response, 
+            String downloadMethodSelected) 
+            throws IOException, FileValidationException {
         switch (downloadMethodSelected) {
             case "CommonsCSV":
-                appCSVWriter.writeWithCommonsCSV(csvFileData, outputFile);
+                appCSVWriter.writeWithCommonsCSV(csvFileData, response);
                 break;
             case "OpenCSV":
-                appCSVWriter.writeWithOpenCSV(csvFileData, outputFile);
+                appCSVWriter.writeWithOpenCSV(csvFileData, response);
                 break;
+            default:
+                throw new FileValidationException("Provided download method "
+                        + "is not supported.");
         }
+    }
+    
+    private void postRedirectGet(HttpServletResponse response, int ... params) 
+            throws IOException {
+        /* Using PRG (Post-Redirect-Get) pattern.
+         * Instead of forwarding from doPost() method redirecting to the doGet()
+         * method of another servlet (display servlet).
+         * This is needed to avoid duplicate data submission when user
+         * refreshes the page.
+         */
+        response.sendRedirect("display.do?sa=" + params[0]
+                + "&su=" + params[1]);
     }
     
     

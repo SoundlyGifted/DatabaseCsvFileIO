@@ -52,7 +52,6 @@ public class DisplayServlet extends HttpServlet {
         
         Integer anyMethodSelected = Integer.valueOf(request.getParameter("sa"));
         Integer uploadSuccessful = Integer.valueOf(request.getParameter("su"));
-        Integer downloadSuccessful = Integer.valueOf(request.getParameter("sd"));
         
         Object exception = session.getAttribute("GeneralApplicationException");
         
@@ -60,14 +59,9 @@ public class DisplayServlet extends HttpServlet {
             request.setAttribute("operationResultDesc", 
                     "No method was selected.");
         } else {
-            if (uploadSuccessful > 0 && downloadSuccessful == 0) {
+            if (uploadSuccessful > 0) {
                 request.setAttribute("operationResultDesc",
                         "Records were added to the database");
-            }
-            if (downloadSuccessful > 0 && uploadSuccessful == 0) {
-                request.setAttribute("operationResultDesc",
-                        "Records were downloaded as a file into your downloads "
-                        + "folder");
             }
             if (exception != null) {
                 request.setAttribute("operationResultDesc", 

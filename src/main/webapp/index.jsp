@@ -87,8 +87,8 @@
             </form>
             
             <div class="div-out-message">
-                <!-- JSTL code to display the result of operation received as
-             http request attribute -->
+            <!-- JSTL code to display the result of operation received as 
+            http request attribute -->
                 <c:if test="${operationResultDesc == null}">
                     <h4>No operation performed yet ...</h4>
                 </c:if>
