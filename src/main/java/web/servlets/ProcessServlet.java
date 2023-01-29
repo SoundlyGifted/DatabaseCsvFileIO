@@ -76,11 +76,14 @@ public class ProcessServlet extends HttpServlet {
              */
             Part filePart = request.getPart("file");
             try {
-                // Parsing csv-file using the selected method.
-                CSVFileData csvFileData
-                        = parseCSVFile(filePart, selectedMethod);
-                // Uploading the parsed data into the database.
-                uploadCSVDataToDB(csvFileData);
+                if (anyMethodSelected > 0) {
+                    // Parsing csv-file using the selected method.
+                    CSVFileData csvFileData
+                            = parseCSVFile(filePart, selectedMethod);
+                    // Uploading the parsed data into the database.
+                    uploadCSVDataToDB(csvFileData);
+                    uploadSuccessful = 1;                 
+                }
             } catch (OperationNotSupportedException
                     | FileValidationException
                     | SQLException
@@ -91,13 +94,12 @@ public class ProcessServlet extends HttpServlet {
                 session.setAttribute("GeneralApplicationException",
                         e.getMessage());
             }
-            uploadSuccessful = 1;
             postRedirectGet(response, anyMethodSelected, uploadSuccessful);
         }
         
         if (clickedDownload != null) {
             try {
-                if (!selectedMethod.isEmpty()) {
+                if (anyMethodSelected > 0) {
                     // Getting the records from the database.
                     CSVFileData csvFileData = databaseHandler.selectAll();
 
