@@ -3,7 +3,7 @@ package web.process.download;
 import jakarta.ejb.Local;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import web.process.csvData.CSVFileData;
+import web.process.csvdata.CSVFileData;
 
 /**
  * This Interface contains method declarations that are used to write a 

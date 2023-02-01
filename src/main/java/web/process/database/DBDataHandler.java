@@ -11,7 +11,7 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import web.process.csvData.CSVFileData;
+import web.process.csvdata.CSVFileData;
 
 /**
  * This Bean contains implementation of methods that are used to handle 

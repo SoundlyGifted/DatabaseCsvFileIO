@@ -15,7 +15,7 @@ import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
-import web.process.csvData.CSVFileData;
+import web.process.csvdata.CSVFileData;
 import web.process.parse.exceptions.FileValidationException;
 
 /**

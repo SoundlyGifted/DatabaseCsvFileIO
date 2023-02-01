@@ -4,7 +4,7 @@ import com.opencsv.exceptions.CsvValidationException;
 import jakarta.ejb.Local;
 import jakarta.servlet.http.Part;
 import java.io.IOException;
-import web.process.csvData.CSVFileData;
+import web.process.csvdata.CSVFileData;
 import web.process.parse.exceptions.FileValidationException;
 
 /**

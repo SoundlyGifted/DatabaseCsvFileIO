@@ -3,7 +3,7 @@ package web.process.database;
 import jakarta.ejb.Local;
 import java.io.IOException;
 import java.sql.SQLException;
-import web.process.csvData.CSVFileData;
+import web.process.csvdata.CSVFileData;
 
 /**
  * This Interface contains method declarations that are used to handle 

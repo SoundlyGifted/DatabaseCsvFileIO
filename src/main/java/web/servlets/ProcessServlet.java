@@ -14,7 +14,7 @@ import jakarta.servlet.http.Part;
 import java.sql.SQLException;
 import javax.naming.OperationNotSupportedException;
 import web.process.parse.exceptions.FileValidationException;
-import web.process.csvData.CSVFileData;
+import web.process.csvdata.CSVFileData;
 import web.process.download.AppCSVWriterLocal;
 import web.process.parse.AppCSVParserLocal;
 import web.process.database.DBDataHandlerLocal;
